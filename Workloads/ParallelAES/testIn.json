@@ -1,0 +1,8 @@
+{
+  "AES1": {
+    "length_of_message": 64,
+    "num_of_iterations": 50,
+    "num_of_processes": 1
+  },
+  "index": 1
+}

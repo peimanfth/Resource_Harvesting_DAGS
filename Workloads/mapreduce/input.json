@@ -1,0 +1,12 @@
+{
+  "$composer": {
+    "openwhisk": {
+      "ignore_certs": true
+    },
+    "redis": {
+      "uri": "redis://174.64.28.38"
+    }
+  },
+  "numPartitions": 3,
+  "data": "wikipedia_data"
+}

@@ -1,0 +1,10 @@
+
+
+AWS_ACCESS_KEY_ID = 'AKIA26EO4UIX52Y2OUVZ'
+AWS_SECRET_ACCESS_KEY = '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'
+COUCHDB_URL = 'http://172.17.0.1:5984/'
+VA_DB_NAME = 'video-bench'
+MR_DB_NAME = 'mr-wikipedia'
+ML_DB_NAME = 'ml-pipeline'
+COUCHDB_PASSWORD = 'some_passw0rd'
+COUCHDB_USERNAME = 'whisk_admin'

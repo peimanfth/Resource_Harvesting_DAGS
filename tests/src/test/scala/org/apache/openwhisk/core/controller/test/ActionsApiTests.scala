@@ -1966,7 +1966,7 @@ class ActionsApiTests extends ControllerTestCommon with WhiskActionsApi {
           Messages.invalidTimeout(controllerActivationConfig.maxWaitForBlockingActivation))
       }
 
-      Post(s"$collectionPath/${action.name}?blocking=true&timeout=65000") ~> Route.seal(routes(creds)) ~> check {
+      Post(s"$collectionPath/${action.name}?blocking=true&timeout=115000") ~> Route.seal(routes(creds)) ~> check {
         status shouldBe BadRequest
         responseAs[String] should include(
           Messages.invalidTimeout(controllerActivationConfig.maxWaitForBlockingActivation))
@@ -1980,7 +1980,7 @@ class ActionsApiTests extends ControllerTestCommon with WhiskActionsApi {
       }
 
       // repeat this time wait longer than active ack delay
-      Post(s"$collectionPath/${action.name}?blocking=true&timeout=500") ~> Route.seal(routes(creds)) ~> check {
+      Post(s"$collectionPath/${action.name}?blocking=true&timeout=66000") ~> Route.seal(routes(creds)) ~> check {
         status shouldBe OK
         val response = responseAs[JsObject]
         response shouldBe activation.withoutLogs.toExtendedJson()

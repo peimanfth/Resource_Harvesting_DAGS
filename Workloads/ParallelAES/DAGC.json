@@ -1,0 +1,70 @@
+{
+    "composition": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/wait1_C",
+                "path": "[0]"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/AES1_C",
+                        "path": "[1][0]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/AES2_C",
+                        "path": "[1][1]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/AES3_C",
+                        "path": "[1][2]"
+                    }
+                ],
+                "path": "[1]"
+            },
+            {
+                "type": "action",
+                "name": "/_/Stats_C",
+                "path": "[2]"
+            }
+        ],
+        "path": ""
+    },
+    "ast": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/wait1_C"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/AES1_C"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/AES2_C"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/AES3_C"
+                    }
+                ]
+            },
+            {
+                "type": "action",
+                "name": "/_/Stats_C"
+            }
+        ]
+    },
+    "version": "0.12.0"
+}

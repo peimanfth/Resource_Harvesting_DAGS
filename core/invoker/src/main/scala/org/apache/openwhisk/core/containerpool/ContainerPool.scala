@@ -64,6 +64,13 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
 
   implicit val ec = context.dispatcher
 
+  //log all configurations in prewarmConfig
+  prewarmConfig.foreach { config =>
+    logging.info(
+      this,
+      s"prewarm config: kind: ${config.exec.kind} memory: ${config.memoryLimit.toString} initialCount: ${config.initialCount} reactive: ${config.reactive}")
+  }
+
   var freePool = immutable.Map.empty[ActorRef, ContainerData]
   var busyPool = immutable.Map.empty[ActorRef, ContainerData]
   var prewarmedPool = immutable.Map.empty[ActorRef, PreWarmedData]
@@ -138,22 +145,28 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
           // Schedule a job to a warm container
           ContainerPool
             .schedule(r.action, r.msg.user.namespace.name, freePool)
-            .map(container => (container, container._2.initingState)) //warmed, warming, and warmingCold always know their state
-            .orElse(
+            .map(container => {
+              logging.info(this, s"schedule job ${r.toString} to container ${container.toString} with initing state ${container._2.initingState}")
+              (container, container._2.initingState) //warmed, warming, and warmingCold always know their state
+            }) 
+            .orElse{
               // There was no warm/warming/warmingCold container. Try to take a prewarm container or a cold container.
               // When take prewarm container, has no need to judge whether user memory is enough
-              takePrewarmContainer(r.action)
+              logging.info(this, s"no warm container for ${r.action}, check if there is a prewarm container")
+              takePrewarmContainer(r.action, r)
                 .map(container => (container, "prewarmed"))
                 .orElse {
                   // Is there enough space to create a new container or do other containers have to be removed?
+                  logging.info(this, "no prewarm container, check if pool has space to create a new container")
                   if (hasPoolSpaceFor(busyPool ++ freePool ++ prewarmedPool, prewarmStartingPool, memory)) {
                     val container = Some(createContainer(memory), "cold")
                     incrementColdStartCount(kind, memory)
                     container
                   } else None
-                })
-            .orElse(
+                }}
+            .orElse{
               // Remove a container and create a new one for the given job
+              logging.info(this, s"no prewarm container avialable, remove a container and create a new one for ${r.action.toString()}")
               ContainerPool
               // Only free up the amount, that is really needed to free up
                 .remove(freePool, Math.min(r.action.limits.memory.megabytes, memoryConsumptionOf(freePool)).MB)
@@ -162,13 +175,14 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
                 // removing the containers, we are not interested anymore in the containers that have been removed.
                 .headOption
                 .map(_ =>
-                  takePrewarmContainer(r.action)
+                  takePrewarmContainer(r.action, r)
                     .map(container => (container, "recreatedPrewarm"))
                     .getOrElse {
                       val container = (createContainer(memory), "recreated")
                       incrementColdStartCount(kind, memory)
                       container
-                  }))
+                  })
+                }
 
         createdContainer match {
           case Some(((actor, data), containerState)) =>
@@ -354,6 +368,7 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
         if (currentCount < desiredCount) {
           (currentCount until desiredCount).foreach { _ =>
             prewarmContainer(config.exec, config.memoryLimit, config.reactive.map(_.ttl))
+            // prewarmUserContainer(config.exec, Run(config.exec, null, null))
           }
         }
       }
@@ -384,6 +399,23 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
     }
   }
 
+  def prewarmUserContainer(action: ExecutableWhiskAction, r: Run): Unit = {
+    val memoryLimit = action.limits.memory.megabytes.MB
+    if (hasPoolSpaceFor(busyPool ++ freePool ++ prewarmedPool, prewarmStartingPool, memoryLimit)) {
+      val actor = childFactory(context)
+      val data = MemoryData(memoryLimit)
+      val newData = data.nextRun(r)
+      val container = newData.getContainer
+      freePool = freePool + (actor -> newData)
+      actor ! createUser(action, r.msg) // forwards the prewarm request to the container
+      logging.info(this, s"prewarm ${actor.toString} and add to free pool")
+    } else {
+      logging.warn(
+        this,
+        s"Cannot create prewarm user container due to reach the invoker memory limit: ${poolConfig.userMemory.toMB}")
+    }
+  }
+
   /** this is only for cold start statistics of prewarm configs, e.g. not blackbox or other configs. */
   def incrementColdStartCount(kind: String, memoryLimit: ByteSize): Unit = {
     prewarmConfig
@@ -406,7 +438,7 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
    * @param action the action that holds the kind and the required memory.
    * @return the container iff found
    */
-  def takePrewarmContainer(action: ExecutableWhiskAction): Option[(ActorRef, ContainerData)] = {
+  def takePrewarmContainer(action: ExecutableWhiskAction, r: Run): Option[(ActorRef, ContainerData)] = {
     val kind = action.exec.kind
     val memory = action.limits.memory.megabytes.MB
     val now = Deadline.now
@@ -428,7 +460,9 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
           //get the appropriate ttl from prewarm configs
           val ttl =
             prewarmConfig.find(pc => pc.memoryLimit == memory && pc.exec.kind == kind).flatMap(_.reactive.map(_.ttl))
-          prewarmContainer(action.exec, memory, ttl)
+          // prewarmContainer(action.exec, memory, ttl)
+          prewarmUserContainer(action, r)
+          
           (ref, data)
       }
   }

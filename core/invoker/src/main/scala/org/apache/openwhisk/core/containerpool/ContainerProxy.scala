@@ -63,6 +63,7 @@ import org.apache.openwhisk.http.Messages
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import scala.sys.process._
 
 // States
 sealed trait ContainerState
@@ -74,6 +75,7 @@ case object Ready extends ContainerState
 case object Pausing extends ContainerState
 case object Paused extends ContainerState
 case object Removing extends ContainerState
+case object Init extends ContainerState
 
 // Data
 /** Base data type */
@@ -196,8 +198,10 @@ case class WarmedData(override val container: Container,
 // Events received by the actor
 case class Start(exec: CodeExec[_], memoryLimit: ByteSize, ttl: Option[FiniteDuration] = None)
 case class Run(action: ExecutableWhiskAction, msg: ActivationMessage, retryLogDeadline: Option[Deadline] = None)
+case class createUser(action: ExecutableWhiskAction, msg: ActivationMessage)
 case object Remove
 case class HealthPingEnabled(enabled: Boolean)
+// case object LogResourceUtilization
 
 // Events sent by the actor
 case class NeedWork(data: ContainerData)
@@ -205,6 +209,7 @@ case object ContainerPaused
 case class ContainerRemoved(replacePrewarm: Boolean) // when container is destroyed
 case object RescheduleJob // job is sent back to parent and could not be processed because container is being destroyed
 case class PreWarmCompleted(data: PreWarmedData)
+case class UserCreated(data: WarmedData)
 case class InitCompleted(data: WarmedData)
 case object RunCompleted
 
@@ -277,28 +282,92 @@ class ContainerProxy(factory: (TransactionId,
   var healthPingActor: Option[ActorRef] = None //setup after prewarm starts
   val tcp: ActorRef = testTcp.getOrElse(IO(Tcp)) //allows to testing interaction with Tcp extension
 
+  // val redis = new RedisClient(logging = logging)
+  // var currentJob: String = "empty"
+  // var logResourceScheduler: Option[Cancellable] = None
+  // override def preStart(): Unit = {
+  //   super.preStart()
+  //   logResourceScheduler = Some(
+  //     context.system.scheduler.scheduleWithFixedDelay(
+  //       0.seconds, 
+  //       10.milliseconds, 
+  //       receiver = self, 
+  //       message=LogResourceUtilization)
+  //   )
+  // }
+
+  // override def postStop() : Unit = {
+  //   super.postStop()
+  //   logResourceScheduler.foreach(_.cancel())
+  // }
+
   startWith(Uninitialized, NoData())
 
   when(Uninitialized) {
     // pre warm a container (creates a stem cell container)
     case Event(job: Start, _) =>
+
+      val memory = MemoryLimit.decodeMemory(job.memoryLimit.toMB.toInt)
+      val cpu = MemoryLimit.decodeCpu(job.memoryLimit.toMB.toInt)
+
       factory(
         TransactionId.invokerWarmup,
         ContainerProxy.containerName(instance, "prewarm", job.exec.kind),
         job.exec.image,
         job.exec.pull,
-        job.memoryLimit,
-        poolConfig.cpuShare(job.memoryLimit),
+        memory.MB,
+        cpu,
+        // job.memoryLimit,
+        // poolConfig.cpuShare(job.memoryLimit),
         poolConfig.cpuLimit(job.memoryLimit),
         None)
-        .map(container =>
-          PreWarmCompleted(PreWarmedData(container, job.exec.kind, job.memoryLimit, expires = job.ttl.map(_.fromNow))))
+          .map(container =>
+            PreWarmCompleted(PreWarmedData(container, job.exec.kind, job.memoryLimit, expires = job.ttl.map(_.fromNow))))
         .pipeTo(self)
-
+      logging.info(this, s"pre-warming ${job.exec.kind} container to stemcell")
       goto(Starting)
+    
+     case Event(job: createUser, _) =>
+      implicit val transid = TransactionId.invokerWarmup
+      val memory = MemoryLimit.decodeMemory(job.action.limits.memory.megabytes)
+      val cpu = MemoryLimit.decodeCpu(job.action.limits.memory.megabytes)
+
+      // create a new container
+      val container = factory(
+        TransactionId.invokerWarmup,
+        ContainerProxy.containerName(instance, "user", job.action.name.asString),
+        job.action.exec.image,
+        job.action.exec.pull,
+        memory.MB,
+        cpu,
+        // job.action.limits.memory.megabytes.MB,
+        // poolConfig.cpuShare(job.action.limits.memory.megabytes.MB),
+        poolConfig.cpuLimit(job.action.limits.memory.megabytes.MB),
+        Some(job.action))
+        .map(container =>
+          // now attempt to inject the user code
+          initializeCode(container, job).andThen {
+            case Success(_) => {
+              logging.info(this, s"job ${job}, prewarm a user container with code injected")
+              goto(Ready) using WarmedData(container, job.msg.user.namespace.name, job.action, Instant.EPOCH)}
+            case Failure(_) => self ! FailureMessage
+          })
+
+      logging.info(this, s"stuck in the this state for container ${container.toString()}")
+
+      //do nothing if event is logResourceUtil
+      
+      stay()
+    // case Event(LogResourceUtilization, _) => stay()
+
+
 
     // cold start (no container to reuse or available stem cell container)
     case Event(job: Run, _) =>
+
+      val memory = MemoryLimit.decodeMemory(job.action.limits.memory.megabytes)
+      val cpu = MemoryLimit.decodeCpu(job.action.limits.memory.megabytes)
+
       implicit val transid = job.msg.transid
       activeCount += 1
       // create a new container
@@ -307,13 +376,15 @@ class ContainerProxy(factory: (TransactionId,
         ContainerProxy.containerName(instance, job.msg.user.namespace.name.asString, job.action.name.asString),
         job.action.exec.image,
         job.action.exec.pull,
-        job.action.limits.memory.megabytes.MB,
-        poolConfig.cpuShare(job.action.limits.memory.megabytes.MB),
+        memory.MB,
+        cpu,
+        // job.action.limits.memory.megabytes.MB,
+        // poolConfig.cpuShare(job.action.limits.memory.megabytes.MB),
         poolConfig.cpuLimit(job.action.limits.memory.megabytes.MB),
         Some(job.action))
 
       // container factory will either yield a new container ready to execute the action, or
-      // starting up the container failed; for the latter, it's either an internal error starting
+      // starting up the container failed; for the latter, it's either an intesrnal error starting
       // a container or a docker action that is not conforming to the required action API
       container
         .andThen {
@@ -352,7 +423,16 @@ class ContainerProxy(factory: (TransactionId,
             .map(_ => RunCompleted)
         }
         .pipeTo(self)
-
+      //preiodcally setTest to redis
+      // val redis = new RedisClient(logging = logging)
+      // //current epoch time
+      // context.system.scheduler.scheduleAtFixedRate(0.seconds, 1.seconds) {
+      //   () =>
+      //     val epoch = System.currentTimeMillis()
+      //     redis.setTestValue(value = epoch.toString)
+      // }
+      logging.info(this, s"starting ${job.action.exec.kind} for ${job.action.name} container due to cold start")
+      // currentJob = job.action.name.asString
       goto(Running)
   }
 
@@ -360,6 +440,7 @@ class ContainerProxy(factory: (TransactionId,
     // container was successfully obtained
     case Event(completed: PreWarmCompleted, _) =>
       context.parent ! NeedWork(completed.data)
+      logging.info(this, s"pre-warming ${completed.data.kind} container completed")
       goto(Started) using completed.data
 
     // container creation failed
@@ -377,6 +458,8 @@ class ContainerProxy(factory: (TransactionId,
       initializeAndRun(data.container, job)
         .map(_ => RunCompleted)
         .pipeTo(self)
+      logging.info(this, s"using pre-warmed ${data.kind} container, attempting to run ${job.action} activation")
+      // currentJob = job.action.name.asString
       goto(Running) using PreWarmedData(data.container, data.kind, data.memoryLimit, 1, data.expires)
 
     case Event(Remove, data: PreWarmedData) => destroyContainer(data, false)
@@ -385,6 +468,9 @@ class ContainerProxy(factory: (TransactionId,
     case Event(_: FailureMessage, data: PreWarmedData) =>
       MetricEmitter.emitCounterMetric(LoggingMarkers.INVOKER_CONTAINER_HEALTH_FAILED_PREWARM)
       destroyContainer(data, true)
+    
+    // do nothing if event is logResourceUtil
+  //   case Event(LogResourceUtilization, data: PreWarmedData) => stay()
   }
 
   when(Running) {
@@ -398,6 +484,17 @@ class ContainerProxy(factory: (TransactionId,
       logging.info(this, s"buffering for warming container ${data.container}; ${activeCount} activations in flight")
       runBuffer = runBuffer.enqueue(job)
       stay()
+
+    // Logging resource utilization of the container while running
+    // case Event(LogResourceUtilization, data: PreWarmedData) => 
+    //   LogResourceUtil(data)
+    //   stay()
+
+    // case Event(LogResourceUtilization, data: WarmedData) =>
+    //   LogResourceUtil(data)
+    //   stay()
+
+
 
     // Run during cold init (for concurrent > 1)
     case Event(job: Run, _: NoData) =>
@@ -505,7 +602,7 @@ class ContainerProxy(factory: (TransactionId,
     case _ => delay
   }
 
-  when(Ready, stateTimeout = pauseGrace) {
+  when(Ready, stateTimeout = unusedTimeout) {
     case Event(job: Run, data: WarmedData) =>
       implicit val transid = job.msg.transid
       activeCount += 1
@@ -513,19 +610,34 @@ class ContainerProxy(factory: (TransactionId,
       initializeAndRun(data.container, job, true)
         .map(_ => RunCompleted)
         .pipeTo(self)
-
+      logging.info(this, s"job ${job.toString()} using prewarmed container ${data.container.toString()} within keep alive period of ${unusedTimeout}")
+      // currentJob = job.action.name.asString
+      // //extract the fields from the job. job is a some object
+      // val activationId = job.msg.activationId
       goto(Running) using newData
 
     // pause grace timed out
     case Event(StateTimeout, data: WarmedData) =>
-      data.container.suspend()(TransactionId.invokerNanny).map(_ => ContainerPaused).pipeTo(self)
-      goto(Pausing)
+      // data.container.suspend()(TransactionId.invokerNanny).map(_ => ContainerPaused).pipeTo(self)
+      // goto(Pausing)
+      
+      // context.system.scheduler.scheduleAtFixedRate(0.seconds, 10.seconds) {
+      //   () =>
+      //     val remaining = unusedTimeout - (Instant.now.toEpochMilli - data.lastUsed.toEpochMilli).millis
+      //     logging.info(this, s"Container ${data.container} for action ${data.action.name} will be destroyed in ${unusedTimeout - pauseGrace} seconds")
+      // }
+
+      logging.info(this, s"Destroying container ${data.container} for action ${data.action.name} due to keep alive period timeout")
+      destroyContainer(data, true)
 
     case Event(Remove, data: WarmedData) => destroyContainer(data, true)
 
     // warm container failed
     case Event(_: FailureMessage, data: WarmedData) =>
       destroyContainer(data, true)
+
+    //do nothing if event is logResourceUtil
+    // case Event(LogResourceUtilization, data: WarmedData) => stay()
   }
 
   when(Pausing) {
@@ -652,6 +764,41 @@ class ContainerProxy(factory: (TransactionId,
     }
   }
 
+    def LogResourceUtil(data: ContainerStarted): Unit = {
+      val containerID = data.container.containerId.asString
+      val containerName = data.container.toString()
+
+      val cgroupPath = s"/sys/fs/cgroup/system.slice/docker-$containerID.scope/cpu.weight"
+      val memCurrentPath = s"/sys/fs/cgroup/system.slice/docker-$containerID.scope/memory.current"
+      val timestamp = Instant.now.getEpochSecond
+
+
+      // Read the cpu.stat file contents
+      val cpuStatContents = try {
+        s"cat $cgroupPath".!!
+      } catch {
+        case e: Exception =>
+          e.printStackTrace()
+          "" // Return an empty string in case of an error
+      }
+      // Read the memory.stat file contents
+      val memCurrentContents = try {
+        s"cat $memCurrentPath".!!
+      } catch {
+        case e: Exception =>
+          e.printStackTrace()
+          "" // Return an empty string in case of an error
+      }
+      val usageUsec = cpuStatContents
+      val memoryUsage = memCurrentContents
+
+      // val usageUsec = cpuStatContents.split("\n").find(_.startsWith("usage_usec")).map(_.split("\\s+")(1)).getOrElse("unknown")
+      // val memoryUsage = memoryStatContents.split("\n").find(_.startsWith("rss")).map(_.split("\\s+")(1)).getOrElse("unknown")
+
+      // redis.logResourceUtil(currentJob.toString(), usageUsec, memoryUsage, timestamp.toString())
+  }
+
+
   /** Delays all incoming messages until unstashAll() is called */
   def delay = {
     stash()
@@ -773,6 +920,51 @@ class ContainerProxy(factory: (TransactionId,
    * @return a future completing after logs have been collected and
    *         added to the WhiskActivation
    */
+
+  def initializeCode(container: Container, job: createUser)(
+    implicit tid: TransactionId) = {
+
+    val actionTimeout = job.action.limits.timeout.duration
+    val unlockedArgs =
+      ContainerProxy.unlockArguments(job.msg.content, job.msg.lockedArgs, ParameterEncryption.singleton)
+
+    val (env, parameters) = ContainerProxy.partitionArguments(unlockedArgs, job.msg.initArgs)
+
+    val environment = Map(
+      "namespace" -> job.msg.user.namespace.name.toJson,
+      "action_name" -> job.msg.action.qualifiedNameWithLeadingSlash.toJson,
+      "action_version" -> job.msg.action.version.toJson,
+      "activation_id" -> job.msg.activationId.toString.toJson,
+      "transaction_id" -> job.msg.transid.id.toJson)
+
+    // if the action requests the api key to be injected into the action context, add it here;
+    // treat a missing annotation as requesting the api key for backward compatibility
+    val authEnvironment = {
+      if (job.action.annotations.isTruthy(Annotations.ProvideApiKeyAnnotationName, valueForNonExistent = true)) {
+        job.msg.user.authkey.toEnvironment.fields
+      } else Map.empty
+    }
+
+  
+    stateData match {
+      case data: WarmedData =>
+        Future.successful(None)
+      case _ =>
+        val owEnv = (authEnvironment ++ environment ++ Map(
+          "deadline" -> (Instant.now.toEpochMilli + actionTimeout.toMillis).toString.toJson)) map {
+          case (key, value) => "__OW_" + key.toUpperCase -> value
+        }
+
+        container
+          .initialize(
+            job.action.containerInitializer(env ++ owEnv),
+            actionTimeout,
+            job.action.limits.concurrency.maxConcurrent,
+            Some(job.action.toWhiskAction))
+          .map(Some(_))
+    }
+  }
+
   def initializeAndRun(container: Container, job: Run, reschedule: Boolean = false)(
     implicit tid: TransactionId): Future[WhiskActivation] = {
     val actionTimeout = job.action.limits.timeout.duration

@@ -100,3 +100,12 @@ core/routemgmt/getApi/utils.js
 # vscode metals
 .bloop/
 .metals/
+
+# frontend
+frontend/data/*
+frontend/inputs/*
+frontend/inputss/*
+
+# workloads
+
+Workloads/tools/data/*

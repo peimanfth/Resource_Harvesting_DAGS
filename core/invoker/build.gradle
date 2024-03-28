@@ -53,6 +53,10 @@ dependencies {
         exclude group: 'log4j'
         exclude group: 'jline'
     }
+    // https://mvnrepository.com/artifact/redis.clients/jedis
+    implementation 'redis.clients:jedis:5.0.0'
+    implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
+
 }
 
 mainClassName = "org.apache.openwhisk.core.invoker.Invoker"

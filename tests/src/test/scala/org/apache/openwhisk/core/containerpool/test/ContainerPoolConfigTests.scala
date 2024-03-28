@@ -36,13 +36,13 @@ class ContainerPoolConfigTests extends FlatSpec with Matchers {
   it should "calculate container cpu shares" in {
     val (userMemory, memoryLimit) = (2.GB, 256.MB)
     val poolConfig = createPoolConfig(userMemory)
-    poolConfig.cpuShare(memoryLimit) shouldBe 128
+    poolConfig.cpuShare(memoryLimit) shouldBe 2
   }
 
   it should "use min cpu shares when calculated container cpu shares is too low" in {
     val (userMemory, memoryLimit) = (1024.MB, 1.MB)
     val poolConfig = createPoolConfig(userMemory)
-    poolConfig.cpuShare(memoryLimit) shouldBe 2 // calculated shares would be 1, but min is 2
+    poolConfig.cpuShare(memoryLimit) shouldBe 1 // calculated shares would be 1, but min is 2
   }
 
   it should "calculate container cpu limit" in {

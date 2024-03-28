@@ -1,0 +1,70 @@
+{
+    "composition": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/partitioner",
+                "path": "[0]"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/mapper0",
+                        "path": "[1][0]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/mapper1",
+                        "path": "[1][1]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/mapper2",
+                        "path": "[1][2]"
+                    }
+                ],
+                "path": "[1]"
+            },
+            {
+                "type": "action",
+                "name": "/_/reducer",
+                "path": "[2]"
+            }
+        ],
+        "path": ""
+    },
+    "ast": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/partitioner"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/mapper0"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/mapper1"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/mapper2"
+                    }
+                ]
+            },
+            {
+                "type": "action",
+                "name": "/_/reducer"
+            }
+        ]
+    },
+    "version": "0.12.0"
+}

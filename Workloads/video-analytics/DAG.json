@@ -1,0 +1,61 @@
+{
+    "composition": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/streaming",
+                "path": "[0]"
+            },
+            {
+                "type": "action",
+                "name": "/_/decoder",
+                "path": "[1]"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/recognition1",
+                        "path": "[2][0]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/recognition2",
+                        "path": "[2][1]"
+                    }
+                ],
+                "path": "[2]"
+            }
+        ],
+        "path": ""
+    },
+    "ast": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/streaming"
+            },
+            {
+                "type": "action",
+                "name": "/_/decoder"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/recognition1"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/recognition2"
+                    }
+                ]
+            }
+        ]
+    },
+    "version": "0.12.0"
+}

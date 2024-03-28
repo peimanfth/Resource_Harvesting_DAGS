@@ -72,9 +72,12 @@ case class ContainerPoolConfig(userMemory: ByteSize,
    * On an idle/underloaded system, a container will still get to use underutilized CPU shares.
    */
   private val totalShare = 1024.0 // This is a pre-defined value coming from docker and not our hard-coded value.
+  private val totalCores = 16
+  // log the number of cores available to the system
   // Grant more CPU to a container if it allocates more memory.
   def cpuShare(reservedMemory: ByteSize) =
-    max((totalShare / (userMemory.toBytes / reservedMemory.toBytes)).toInt, 2) // The minimum allowed cpu-shares is 2
+    max((math.ceil(totalCores.toDouble / (userMemory.toBytes.toDouble / reservedMemory.toBytes.toDouble))).toInt
+, 1) // The minimum allowed cpu-shares is 2
 
   private val minContainerCpus = 0.01 // The minimum cpus allowed by docker is 0.01
   private val roundingMultiplier = 100000

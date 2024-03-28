@@ -64,6 +64,25 @@ protected[entity] class MemoryLimit private (val megabytes: Int) extends AnyVal 
 }
 
 protected[core] object MemoryLimit extends ArgNormalizer[MemoryLimit] {
+
+
+  val MIN_CPU: Int = 1
+  val MAX_CPU: Int = 8
+  val STD_CPU: Int = 1
+  val CPU_UNIT: Int = 1
+  val MAX_MEM: Int = 32
+  val MEM_UNIT: Int = 128
+  val MAX_CONFIG: Int = MAX_CPU * MAX_MEM
+
+  // Decode cpu limit  
+  def decodeCpu(input: Int): Int = (input - 1) / MAX_MEM * CPU_UNIT + CPU_UNIT
+
+  // Decode memory limit
+  def decodeMemory(input: Int): Int = (input - 1) % MAX_MEM * MEM_UNIT + MEM_UNIT
+
+  // Encode
+  def encode(memory: Int, cpu: Int): Int = (cpu / CPU_UNIT - 1) * MAX_MEM + memory / MEM_UNIT
+
   val config = loadConfigOrThrow[MemoryLimitConfig](ConfigKeys.memory)
   val namespaceDefaultConfig = try {
     loadConfigOrThrow[NamespaceMemoryLimitConfig](ConfigKeys.namespaceMemoryLimit)

@@ -1,0 +1,38 @@
+{
+	"composition": {
+		"type": "sequence",
+		".combinator": {},
+		"components": [
+			{
+				"type": "action",
+				"name": "/_/hi",
+				".combinator": {},
+				"path": ""
+			},
+			{
+				"type": "action",
+				"name": "/_/bye",
+				".combinator": {},
+				"path": ""
+			}
+		],
+		"path": ""
+	},
+	"ast": {
+		"type": "sequence",
+		".combinator": {},
+		"components": [
+			{
+				"type": "action",
+				"name": "/_/hi",
+				".combinator": {}
+			},
+			{
+				"type": "action",
+				"name": "/_/bye",
+				".combinator": {}
+			}
+		]
+	},
+	"version": "0.15.1"
+}

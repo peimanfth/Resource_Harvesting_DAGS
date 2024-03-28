@@ -35,12 +35,12 @@
       - "{{ redis.port }}:6379"
     env:
       TZ: "{{ docker.timezone }}"
-    command:
-      /bin/sh -c
-      "docker-entrypoint.sh --requirepass {{ redis.password }}"
+    # command:
+    #   /bin/sh -c
+    #   "docker-entrypoint.sh --requirepass {{ redis.password }}"
 
 - name: wait until redis is up and running
-  shell: "docker run --link redis:redis --rm redis:{{ redis.version }} redis-cli -h redis -p 6379 -a {{ redis.password }} ping"
+  shell: "docker run --link redis:redis --rm redis:{{ redis.version }} redis-cli -h redis -p 6379  ping"
   register: result
   until: (result.rc == 0) and (result.stdout == 'PONG')
   retries: 12

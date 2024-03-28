@@ -1,0 +1,43 @@
+{
+  "$composer": {
+    "openwhisk": {
+      "ignore_certs": true
+    },
+    "redis": {
+      "uri": "redis://174.64.28.38"
+    }
+  },
+  "data": {
+    "key1": "300",
+    "num_of_trees": [
+      5,
+      10,
+      20,
+      30
+    ],
+    "max_depth": [
+      10,
+      20,
+      30,
+      40
+    ],
+    "feature_fraction": [
+      0.25,
+      0.5,
+      0.75,
+      0.95
+    ],
+    "paramtune1": {
+      "num_of_processes": 1
+    },
+    "paramtune2": {
+      "num_of_processes": 2
+    },
+    "paramtune3": {
+      "num_of_processes": 4
+    },
+    "paramtune4": {
+      "num_of_processes": 8
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+	"composition": {
+		"type": "sequence",
+		".combinator": {},
+		"components": [
+			{
+				"type": "action",
+				"name": "/_/hello",
+				".combinator": {},
+				"path": ""
+			},
+			{
+				"type": "action",
+				"name": "/_/byebye",
+				".combinator": {},
+				"path": ""
+			}
+		],
+		"path": ""
+	},
+	"ast": {
+		"type": "sequence",
+		".combinator": {},
+		"components": [
+			{
+				"type": "action",
+				"name": "/_/hello",
+				".combinator": {},
+				"action": {
+					"exec": {
+						"kind": "python:3.10",
+						"code": "def hello(env):\n    return { 'message': 'hello' }\n",
+						"main": "hello"
+					}
+				}
+			},
+			{
+				"type": "action",
+				"name": "/_/byebye",
+				".combinator": {},
+				"action": {
+					"exec": {
+						"kind": "python:3.10",
+						"code": "def byebye(args):\n    return { 'res': 'byebye ' + args['message'] }\n",
+						"main": "byebye"
+					}
+				}
+			}
+		]
+	},
+	"version": "0.15.1",
+	"actions": [
+		{
+			"name": "/_/hello",
+			"action": {
+				"exec": {
+					"kind": "python:3.10",
+					"code": "def hello(env):\n    return { 'message': 'hello' }\n",
+					"main": "hello"
+				}
+			}
+		},
+		{
+			"name": "/_/byebye",
+			"action": {
+				"exec": {
+					"kind": "python:3.10",
+					"code": "def byebye(args):\n    return { 'res': 'byebye ' + args['message'] }\n",
+					"main": "byebye"
+				}
+			}
+		}
+	]
+}

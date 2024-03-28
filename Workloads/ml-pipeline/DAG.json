@@ -1,0 +1,79 @@
+{
+    "composition": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/pca",
+                "path": "[0]"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune1",
+                        "path": "[1][0]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune2",
+                        "path": "[1][1]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune3",
+                        "path": "[1][2]"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune4",
+                        "path": "[1][3]"
+                    }
+                ],
+                "path": "[1]"
+            },
+            {
+                "type": "action",
+                "name": "/_/combine",
+                "path": "[2]"
+            }
+        ],
+        "path": ""
+    },
+    "ast": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/pca"
+            },
+            {
+                "type": "parallel",
+                "components": [
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune1"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune2"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune3"
+                    },
+                    {
+                        "type": "action",
+                        "name": "/_/paramtune4"
+                    }
+                ]
+            },
+            {
+                "type": "action",
+                "name": "/_/combine"
+            }
+        ]
+    },
+    "version": "0.12.0"
+}

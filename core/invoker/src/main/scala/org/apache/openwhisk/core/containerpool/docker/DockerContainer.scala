@@ -89,8 +89,11 @@ object DockerContainer {
     // NOTE: --dns-option on modern versions of docker, but is --dns-opt on docker 1.12
     val dnsOptString = if (docker.clientVersion.startsWith("1.12")) { "--dns-opt" } else { "--dns-option" }
     val args = Seq(
-      "--cpu-shares",
+      // "--cpu-shares",
+      "--cpus",
       cpuShares.toString,
+      // "--cpuset-cpus",
+      // "5", // TODO: this is a temporary fix to avoid using all cores, we should use the cpuLimit parameter
       "--memory",
       s"${memory.toMB}m",
       "--memory-swap",
@@ -102,7 +105,7 @@ object DockerContainer {
       dnsSearch.flatMap(d => Seq("--dns-search", d)) ++
       dnsOptions.flatMap(d => Seq(dnsOptString, d)) ++
       name.map(n => Seq("--name", n)).getOrElse(Seq.empty) ++
-      cpuLimit.map(c => Seq("--cpus", c.toString)).getOrElse(Seq.empty) ++
+      // cpuLimit.map(c => Seq("--cpus", c.toString)).getOrElse(Seq.empty) ++
       params
 
     val registryConfigUrl = registryConfig.map(_.url).getOrElse("")

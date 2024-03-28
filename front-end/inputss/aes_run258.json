@@ -1,0 +1,27 @@
+{
+    "$composer": {
+        "openwhisk": {
+            "ignore_certs": true
+        },
+        "redis": {
+            "uri": "redis://174.64.28.38"
+        }
+    },
+    "data": {
+        "AES1": {
+            "length_of_message": 150,
+            "num_of_iterations": 15000,
+            "num_of_processes": 3
+        },
+        "AES2": {
+            "length_of_message": 150,
+            "num_of_iterations": 15000,
+            "num_of_processes": 3
+        },
+        "AES3": {
+            "length_of_message": 150,
+            "num_of_iterations": 30000,
+            "num_of_processes": 6
+        }
+    }
+}

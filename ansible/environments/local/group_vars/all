@@ -35,7 +35,7 @@ apigw_host_v2: "http://{{ groups['apigateway']|first }}:{{apigateway.port.api}}/
 invoker_allow_multiple_instances: true
 
 # Set kafka configuration
-kafka_heap: '512m'
+kafka_heap: "512m"
 kafka_topics_completed_retentionBytes: 104857600
 kafka_topics_completed_retentionMS: 300000
 kafka_topics_health_retentionBytes: 104857600
@@ -49,3 +49,10 @@ container_pool_akka_client: true
 runtimes_enable_concurrency: true
 limit_action_concurrency_max: 500
 namespace_default_limit_action_concurrency_max: 500
+
+invoker_heap: "5g"
+# invoker_user_memory: '240g'
+
+invoker_user_memory: "8g"
+containerProxy_timeouts_idleContainer: "1 minutes"
+# invoker_user_cpus: 1.0

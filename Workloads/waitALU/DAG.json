@@ -1,0 +1,32 @@
+{
+    "composition": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/waitInput",
+                "path": "[0]"
+            },
+            {
+                "type": "action",
+                "name": "/_/ALU",
+                "path": "[1]"
+            }
+        ],
+        "path": ""
+    },
+    "ast": {
+        "type": "sequence",
+        "components": [
+            {
+                "type": "action",
+                "name": "/_/waitInput"
+            },
+            {
+                "type": "action",
+                "name": "/_/ALU"
+            }
+        ]
+    },
+    "version": "0.12.0"
+}

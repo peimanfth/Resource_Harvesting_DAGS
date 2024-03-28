@@ -1,0 +1,12 @@
+accessKeyId="AKIA26EO4UIX52Y2OUVZ" 
+accessKey="QaTs52trwknatk0kqp43NtklWcLTgB8LznSJkrcB"
+bucketName="wikipedia-mr"
+wikipediaFile="enwiki-latest-pages-articles17.xml"
+dstBucket="mr-results"
+AWS_ACCESS_KEY_ID = 'AKIA26EO4UIX52Y2OUVZ'
+AWS_SECRET_ACCESS_KEY = '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'
+COUCHDB_URL = 'http://172.17.0.1:5984/'
+MR_DB_NAME = 'mr-wikipedia'
+COUCHDB_DOC = 'wikipedia_data'
+COUCHDB_PASSWORD = 'some_passw0rd'
+COUCHDB_USERNAME = 'whisk_admin'
