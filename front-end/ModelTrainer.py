@@ -60,15 +60,21 @@ class ModelTrainer:
             
         Returns:
             float: The error rate.
+            list: The list of errors.
         """
         errors = 0
+        error_list = []
         for actual, predicted in zip(y_actual, y_predicted):
+            actualError = abs(actual - predicted)/actual
+            error_list.append(actualError)
             # Check if predicted falls outside the integer range of actual
             if not (int(actual) <= predicted < int(actual) + 1):
                 errors += 1
         
         error_rate = errors / len(y_actual)
-        return error_rate
+        return error_rate,error_list
+    
+
     
     @staticmethod
     def calculate_memory_usage_error_rate(y_actual, y_predicted):
@@ -82,14 +88,18 @@ class ModelTrainer:
             
         Returns:
             float: The error rate.
+            list: The list of errors.
         """
         errors = 0
+        error_list = []
         for actual, predicted in zip(y_actual, y_predicted):
+            actualError = abs(actual - predicted)/actual
+            error_list.append(actualError)
             if not (actual - 5 <= predicted <= actual + 5):
                 errors += 1
         
         error_rate = errors / len(y_actual)
-        return error_rate
+        return error_rate,error_list
 
 
 
@@ -148,8 +158,11 @@ if __name__ == '__main__':
 
     y_pred_memory = trainer_memory_usage.predict(X_test)
     trainer_memory_usage.evaluate(y_test_memory_usage, y_pred_memory)
-    print(f"Memory Usage Error Rate: {ModelTrainer.calculate_memory_usage_error_rate(ensure_1d_array(y_test_memory_usage),ensure_1d_array(y_pred_memory))}")
-
+    error_rate, error_list = ModelTrainer.calculate_memory_usage_error_rate(ensure_1d_array(y_test_memory_usage),ensure_1d_array(y_pred_memory))
+    print(f"Memory Usage Error Rate: {error_rate}")
+    #write the error list to a csv file
+    error_df = pd.DataFrame(error_list)
+    error_df.to_csv('memory_error_list.csv', index=False)
 
 
     trainer_duration.save_model(os.path.join(models_dir, 'model_duration.pkl'))
@@ -157,7 +170,13 @@ if __name__ == '__main__':
 
     trainer_cpu_usage.save_model(os.path.join(models_dir, 'model_cpu_usage.pkl'))
     trainer_cpu_usage.save_encoder(os.path.join(models_dir, 'encoder_cpu_usage.pkl'))
-    print(f"CPU Usage Error Rate: {ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test_cpu_usage),ensure_1d_array(y_pred_cpu))}")
+    # print(f"CPU Usage Error Rate: {ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test_cpu_usage),ensure_1d_array(y_pred_cpu))}")
+    error_rate, error_list = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test_cpu_usage),ensure_1d_array(y_pred_cpu))
+    print(f"CPU Usage Error Rate: {error_rate}")
+    #write the error list to a csv file
+    error_df = pd.DataFrame(error_list)
+    error_df.to_csv('cpu_error_list.csv', index=False)
+
 
     trainer_memory_usage.save_model(os.path.join(models_dir, 'model_memory_usage.pkl'))
     trainer_memory_usage.save_encoder(os.path.join(models_dir, 'encoder_memory_usage.pkl'))

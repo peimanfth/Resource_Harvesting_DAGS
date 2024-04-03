@@ -109,3 +109,4 @@ frontend/inputss/*
 # workloads
 
 Workloads/tools/data/*
+frontend/data/*

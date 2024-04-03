@@ -39,10 +39,11 @@ def invokeDAG(dag_ID, input):
     csv_file_name = 'test.csv'
     csv_dir = './logs'
     missing_logs = 'missing_functions.log'
+    os.makedirs(csv_dir, exist_ok=True)
     # with open(csv_file_name, 'a', newline='') as csvfile:
     with open(os.path.join(csv_dir, csv_file_name), 'a', newline='') as csvfile:
         # Define the CSV column names
-        fieldnames = ['Unique DAG ID','DAG Input', 'Function Name', "Input Feature", 'Duration','Parallel Duration', 'Memory_Allocated', 'CPU_Allocated','Max Memory Usage', 'Max CPU Usage', 'Start Time', 'End Time', 'Timeout Status']
+        fieldnames = ['Unique DAG ID','DAG Input', 'Function Name', "Input Feature", 'Duration','Parallel Duration', 'Memory_Allocated', 'CPU_Allocated','Max Memory Usage', 'Max CPU Usage', 'Start Time', 'End Time', 'Timeout Status', 'Input File']
         # Create a CSV DictWriter object
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
@@ -122,7 +123,8 @@ def invokeDAG(dag_ID, input):
                 'Max CPU Usage': cpu_usage,
                 'Start Time': start_time,
                 'End Time': end_time,
-                'Timeout Status': timeout
+                'Timeout Status': timeout,
+                'Input File': input
             })
 
     return result
