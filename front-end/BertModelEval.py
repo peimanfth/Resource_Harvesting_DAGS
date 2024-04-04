@@ -127,7 +127,7 @@ if __name__ == '__main__':
     input_size = df.shape[1] - 1  # Excluding the target column
 
     # Split the dataset
-    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+    train_df, test_df = train_test_split(df, test_size=1/3, random_state=42)
 
     # Define the models to compare
     models = {
