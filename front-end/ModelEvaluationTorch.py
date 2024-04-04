@@ -169,7 +169,7 @@ if __name__ == '__main__':
     # for target in targets:
     #     print(f"\n----- Evaluating for target: {target} -----")
     #     X_train, y_train = ModelTrainer(None).prepare_data(train_df, features, [target])
-    #     X_test, y_test = ModelTrainer(None).prepare_data(test_df, features, [target])
+    #     X_test, y_test = ModelTrainer(Nohttps://www.youtube.comn/ne).prepare_data(test_df, features, [target])
         
     #     for model_name, model_class in models.items():
     #         print(f"\nTraining and evaluating {model_name} for {target}")
