@@ -108,6 +108,7 @@ if __name__ == '__main__':
     test_df = df.iloc[1200:]
 
     features = ['Function Name', 'Input Feature']
+
     targets = ['Duration', 'Max CPU Usage', 'Max Memory Usage']
     
 
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     }
 
     results = {}
-    error_directory = "./logs/errors"
+    error_directory = "./logs/naiveEncoder/errors"
     os.makedirs(error_directory, exist_ok=True)
 
     time_results = []
@@ -164,8 +165,8 @@ if __name__ == '__main__':
             })
             results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": err}
     time_df = pd.DataFrame(time_results)
-    os.makedirs('./logs/times', exist_ok=True)
-    time_df.to_csv('./logs/times/model_time_statistics.csv', index=False)
+    os.makedirs('./logs/naiveEncoder/times', exist_ok=True)
+    time_df.to_csv('./logs/naiveEncoder/times/model_time_statistics.csv', index=False)
     # for target in targets:
     #     print(f"\n----- Evaluating for target: {target} -----")
     #     X_train, y_train = ModelTrainer(None).prepare_data(train_df, features, [target])

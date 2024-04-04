@@ -22,15 +22,17 @@ import torch.optim as optim
 class SimpleNN(nn.Module):
     def __init__(self, input_size):
         super(SimpleNN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 64)
+        self.fc1 = nn.Linear(input_size, 128)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, 1)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 128)
+        self.fc4 = nn.Linear(128, 1)
     
     def forward(self, x):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.relu(self.fc3(x))
+        x = self.fc4(x)
         return x
 # Define a function to train and evaluate a model
 # def train_and_evaluate_model(model_class, model_name, X_train, y_train, X_test, y_test):
@@ -83,12 +85,15 @@ def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test
     
     model.train()
     start_time = time.time()
-    for epoch in range(100):  # Assuming 100 epochs
+    num_epochs = 300
+    for epoch in range(num_epochs):  # Assuming 100 epochs
         optimizer.zero_grad()
         outputs = model(X_train_tensor)
         loss = criterion(outputs, y_train_tensor.view(-1, 1))
         loss.backward()
         optimizer.step()
+        if epoch % 50 == 0:
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
     training_time = time.time() - start_time
     
     # Evaluation
@@ -111,6 +116,12 @@ if __name__ == '__main__':
 
     # Load the dataset
     df = pd.read_csv(dataset_path)
+    #print number of columns
+    print(df.columns)
+    df.drop('Function Name_AES1', axis=1, inplace=True)
+    df.drop('Function Name_AES2', axis=1, inplace=True)
+    df.drop('Function Name_AES3', axis=1, inplace=True)
+    print(df.columns)
 
     # Assuming a 768-dimensional embedding plus encoded function names
     input_size = df.shape[1] - 1  # Excluding the target column
@@ -120,8 +131,8 @@ if __name__ == '__main__':
 
     # Define the models to compare
     models = {
-        "RandomForest": RandomForestRegressor,
         "LinearRegression": LinearRegression,
+        "RandomForest": RandomForestRegressor,
         "DecisionTree": DecisionTreeRegressor,
         "SVR": SVR,
         "XGBoost": XGBRegressor,
@@ -136,7 +147,7 @@ if __name__ == '__main__':
     y_test = test_df['Max CPU Usage']
 
     results = {}
-    error_directory = "./logsBert/errors"
+    error_directory = "./logs/bertEncoder/errors"
     os.makedirs(error_directory, exist_ok=True)
 
     time_results = []
@@ -144,7 +155,6 @@ if __name__ == '__main__':
     for model_name, model in models.items():
         print(f"\n----- Training and Evaluating {model_name} -----")
         if model_name == "BasicNN":
-            # Adjust the training function for PyTorch model as per your implementation
             y_pred, training_time, inference_time = train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test, y_test)
             cpu_err, cpu_err_list = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
             error_df = pd.DataFrame(cpu_err_list)
@@ -175,6 +185,6 @@ if __name__ == '__main__':
 
     # Save the time and performance results
     time_df = pd.DataFrame(time_results)
-    os.makedirs('./logsBert/times', exist_ok=True)
-    time_df.to_csv('./logsBert/times/model_performance_statistics.csv', index=False)
+    os.makedirs('./logs/bertEncoder/times', exist_ok=True)
+    time_df.to_csv('./logs/bertEncoder/times/model_performance_statistics.csv', index=False)
 
