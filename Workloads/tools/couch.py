@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     test_path = 'data/Digits_Test.txt'
-    rel_train_path = 'data/Digits_Train .txt'
+    rel_train_path = 'data/Digits_Train.txt'
     train_path = os.path.join(current_dir, rel_train_path)
     couchdb_url = COUCHDB_URL
     db_name = ML_DB_NAME

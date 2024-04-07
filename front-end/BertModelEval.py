@@ -18,14 +18,15 @@ from utils import ensure_1d_array
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
 
 class SimpleNN(nn.Module):
     def __init__(self, input_size):
         super(SimpleNN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 128)
+        self.fc1 = nn.Linear(input_size, 512)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 128)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 128)
         self.fc4 = nn.Linear(128, 1)
     
     def forward(self, x):
@@ -85,8 +86,8 @@ def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test
     
     model.train()
     start_time = time.time()
-    num_epochs = 300
-    for epoch in range(num_epochs):  # Assuming 100 epochs
+    num_epochs = 500
+    for epoch in range(num_epochs): 
         optimizer.zero_grad()
         outputs = model(X_train_tensor)
         loss = criterion(outputs, y_train_tensor.view(-1, 1))
@@ -108,6 +109,56 @@ def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test
     
     return y_pred.cpu().numpy(), training_time, inference_time
 
+
+# def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test, y_test):
+#     print(f"Training and evaluating {model_name}")
+    
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#     model.to(device)
+    
+#     # Convert data to PyTorch tensors and create DataLoader for batch processing
+#     train_dataset = TensorDataset(torch.tensor(X_train.values, dtype=torch.float32), 
+#                                   torch.tensor(y_train.values, dtype=torch.float32))
+#     train_loader = DataLoader(dataset=train_dataset, batch_size=256, shuffle=True)
+    
+#     test_dataset = TensorDataset(torch.tensor(X_test.values, dtype=torch.float32))
+#     test_loader = DataLoader(dataset=test_dataset, batch_size=256)
+    
+#     optimizer = optim.Adam(model.parameters(), lr=0.001)
+#     criterion = nn.MSELoss()
+    
+#     model.train()
+#     start_time = time.time()
+#     num_epochs = 5000
+#     for epoch in range(num_epochs):
+#         for inputs, targets in train_loader:
+#             inputs, targets = inputs.to(device), targets.to(device)
+#             optimizer.zero_grad()
+#             outputs = model(inputs)
+#             loss = criterion(outputs, targets.view(-1, 1))
+#             loss.backward()
+#             optimizer.step()
+#         if epoch % 50 == 0:
+#             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+#     training_time = time.time() - start_time
+    
+#     # Evaluation
+#     model.eval()
+#     predictions = []
+#     with torch.no_grad():
+#         for inputs in test_loader:
+#             inputs = inputs[0].to(device)  # Extract inputs from test_loader
+#             outputs = model(inputs)
+#             predictions.append(outputs.cpu().numpy())
+#     predictions = np.concatenate(predictions, axis=0)
+#     inference_time = time.time() - start_time - training_time
+    
+#     # Assuming your ModelTrainer or another utility function handles the evaluation metrics
+#     torch.save(model.state_dict(), os.path.join(MODELS_DIR, f'model_{model_name}.pth'))
+    
+#     return predictions, training_time, inference_time
+
+
 if __name__ == '__main__':
     
 
@@ -118,9 +169,9 @@ if __name__ == '__main__':
     df = pd.read_csv(dataset_path)
     #print number of columns
     print(df.columns)
-    df.drop('Function Name_AES1', axis=1, inplace=True)
-    df.drop('Function Name_AES2', axis=1, inplace=True)
-    df.drop('Function Name_AES3', axis=1, inplace=True)
+    # df.drop('Function Name_AES1', axis=1, inplace=True)
+    # df.drop('Function Name_AES2', axis=1, inplace=True)
+    # df.drop('Function Name_AES3', axis=1, inplace=True)
     print(df.columns)
 
     # Assuming a 768-dimensional embedding plus encoded function names

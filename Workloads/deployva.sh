@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-memory=64
+memory=1
 timeout=240000
 
 cd video-analytics

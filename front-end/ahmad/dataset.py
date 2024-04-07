@@ -19,7 +19,7 @@ class MyDataset(Dataset):
         
         # Outputs: max_memory_usage, max_cpu_usage
         self.y = self.data[['max_memory_usage', 'max_cpu_usage']].values
-
+        # self.y = self.data['max_cpu_usage'].values
     def __len__(self):
         # Return the size of the dataset
         return len(self.data)

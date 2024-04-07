@@ -27,13 +27,13 @@ def handler(event, context=None):
         'num_frames': num_frames,
         'db_name': 'video-bench',
         'doc_name': doc_name,
-        'request_id': request_id
+        'request_ids': [f'{request_id}-recog1', f'{request_id}-recog2'],
 
     }
 
 # if __name__ == "__main__":
 #     event = {
-#         'video': 'car',
-#         'num_frames': 1
+#         "video": "car",
+#         "num_frames": 2
 #     }
 #     print(handler(event))

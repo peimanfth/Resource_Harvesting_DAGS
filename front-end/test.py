@@ -104,4 +104,4 @@ from Couch import Couch
 
 # update_Function("AES2", 2,2)
 
-print(decodeMemory(33))
+print(decodeMemory(42), decodeCpu(42))
