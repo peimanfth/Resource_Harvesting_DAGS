@@ -1,0 +1,25 @@
+Unique DAG ID,DAG Input,Function Name,Input Feature,Duration,Parallel Duration,Memory_Allocated,CPU_Allocated,Max Memory Usage,Max CPU Usage,Start Time,End Time,Timeout Status,Input File
+vid-45aef355-eaa8-4b3d-b69a-9540a75feb13,9,streaming,,278,,128,2,0.0,0.0,1712605628507,1712605628785,False,./inputs/vid.json
+vid-45aef355-eaa8-4b3d-b69a-9540a75feb13,9,decoder,,1116,,640,2,0.0,0.0,1712605629307,1712605630423,False,./inputs/vid.json
+vid-45aef355-eaa8-4b3d-b69a-9540a75feb13,9,recognition1,3,3752,0,2560,1,0.0,0.0,1712605631987,1712605635739,False,./inputs/vid.json
+vid-45aef355-eaa8-4b3d-b69a-9540a75feb13,9,recognition2,6,5303,0,2560,1,0.0,0.0,1712605631993,1712605637296,False,./inputs/vid.json
+vid-3e5a0903-be6d-40fd-9021-f73d21578d37,9,streaming,,285,,128,2,0.0,0.0,1712605638547,1712605638832,False,./inputs/vid.json
+vid-3e5a0903-be6d-40fd-9021-f73d21578d37,9,decoder,,1217,,640,2,0.0,0.0,1712605639267,1712605640484,False,./inputs/vid.json
+vid-3e5a0903-be6d-40fd-9021-f73d21578d37,9,recognition1,3,3114,0,2560,1,0.0,0.0,1712605641232,1712605644346,False,./inputs/vid.json
+vid-3e5a0903-be6d-40fd-9021-f73d21578d37,9,recognition2,6,18879,0,2560,2,0.0,0.0,1712605641238,1712605660117,False,./inputs/vid.json
+vid-df0fbb7d-b54c-4216-879a-f36e8abc9b5b,9,streaming,,283,,128,2,0.0,0.0,1712605661320,1712605661603,False,./inputs/vid.json
+vid-df0fbb7d-b54c-4216-879a-f36e8abc9b5b,9,decoder,,1144,,640,2,0.0,0.0,1712605662068,1712605663212,False,./inputs/vid.json
+vid-df0fbb7d-b54c-4216-879a-f36e8abc9b5b,9,recognition1,3,2986,0,2560,2,0.0,0.0,1712605663904,1712605666890,False,./inputs/vid.json
+vid-df0fbb7d-b54c-4216-879a-f36e8abc9b5b,9,recognition2,6,6139,0,2560,4,0.0,0.0,1712605663911,1712605670050,False,./inputs/vid.json
+vid-d74a158a-d9eb-463c-87b7-a291a5672d63,9,streaming,,305,,128,2,0.0,0.0,1712605671215,1712605671520,False,./inputs/vid.json
+vid-d74a158a-d9eb-463c-87b7-a291a5672d63,9,decoder,,1103,,640,2,0.0,0.0,1712605672493,1712605673596,False,./inputs/vid.json
+vid-d74a158a-d9eb-463c-87b7-a291a5672d63,9,recognition1,3,6554,0,2560,3,0.0,0.0,1712605674323,1712605680877,False,./inputs/vid.json
+vid-d74a158a-d9eb-463c-87b7-a291a5672d63,9,recognition2,6,7758,0,2560,6,0.0,0.0,1712605674317,1712605682075,False,./inputs/vid.json
+vid-17912262-cba9-4355-9ce4-186725b3abed,9,streaming,,276,,128,2,0.0,0.0,1712605683289,1712605683565,False,./inputs/vid.json
+vid-17912262-cba9-4355-9ce4-186725b3abed,9,decoder,,1143,,640,2,0.0,0.0,1712605684084,1712605685227,False,./inputs/vid.json
+vid-17912262-cba9-4355-9ce4-186725b3abed,9,recognition1,3,4455,0,2560,2,0.0,0.0,1712605685936,1712605690391,False,./inputs/vid.json
+vid-17912262-cba9-4355-9ce4-186725b3abed,9,recognition2,6,19367,0,2560,2,0.0,0.0,1712605685929,1712605705296,False,./inputs/vid.json
+vid-16b34e10-10f3-4f42-b985-f3fb5b3e544d,9,streaming,,285,,128,2,0.0,0.0,1712605706443,1712605706728,False,./inputs/vid.json
+vid-16b34e10-10f3-4f42-b985-f3fb5b3e544d,9,decoder,,1092,,640,2,0.0,0.0,1712605707201,1712605708293,False,./inputs/vid.json
+vid-16b34e10-10f3-4f42-b985-f3fb5b3e544d,9,recognition1,3,3495,0,2560,3,0.0,0.0,1712605708996,1712605712491,False,./inputs/vid.json
+vid-16b34e10-10f3-4f42-b985-f3fb5b3e544d,9,recognition2,6,9819,0,2560,3,0.0,0.0,1712605708990,1712605718809,False,./inputs/vid.json

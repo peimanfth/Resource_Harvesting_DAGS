@@ -37,7 +37,60 @@ USER_CONFIG = {
         "CPU": 1,
         "Params" : "./inputs/AS.json"
     },
-"ml": {
+    "vid": {
+        "Functions": {
+            "streaming": {
+                "Memory": 128,
+                "CPU": 1,
+                "stage" : None,
+                "idx": None
+            },
+            "decoder": {
+                "Memory": 1024,
+                "CPU": 1,
+                "stage" : "pre",
+                "idx": None
+            },
+            "recognition1": {
+                "Memory": 1024,
+                "CPU": 2,
+                "stage" : "parallel",
+                "idx": 0
+            },
+            "recognition2": {
+                "Memory": 1024,
+                "CPU": 4,
+                "stage" : "parallel",
+                "idx": 1
+            }
+        },
+        "Memory": 64,
+        "CPU": 1,
+        "Params" : "./inputs/VA.json"
+    },
+    "MR": {
+        "Functions": {
+            "map": {
+                "Memory": 1024,
+                "CPU": 1,
+                "Params" : None
+            },
+            "reduce": {
+                "Memory": 1024,
+                "CPU": 1,
+                "Params" : None
+            },
+            "combine": {
+                "Memory": 1024,
+                "CPU": 1,
+                "Params" : None
+            }
+        },
+        "Memory": 64,
+        "CPU": 1,
+        "Params" : "./inputs/MR.json"
+    },
+    "ml": {
         "Functions": {
             "pca": {
                 "Memory": 1024,

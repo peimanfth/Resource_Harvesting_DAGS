@@ -1,0 +1,4 @@
+Unique DAG ID,DAG Input,Function Name,Input Feature,Duration,Parallel Duration,Memory_Allocated,CPU_Allocated,Max Memory Usage,Max CPU Usage,Avg CPU Usage,Start Time,End Time,Timeout Status,Input File
+vid-1784e64f-a342-4a84-aeb0-a2514caab4c4,42,streaming,,452,,128,1,27.480064,0.0024102564102564104,0.0024102564102564104,1712729148454,1712729148906,False,./inputs/vid.json
+vid-1784e64f-a342-4a84-aeb0-a2514caab4c4,42,decoder,,1820,,640,1,98.164736,0.7225548780487805,0.17582154715134746,1712729149384,1712729151204,False,./inputs/vid.json
+vid-1784e64f-a342-4a84-aeb0-a2514caab4c4,42,recognition1,14,31150,31150,2560,6,478.806016,3.642474358974359,0.05624286107083013,1712729152946,1712729184096,False,./inputs/vid.json

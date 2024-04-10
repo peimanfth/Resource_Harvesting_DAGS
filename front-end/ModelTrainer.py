@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 import joblib
+import math
 from utils import ensure_1d_array
 
 class ModelTrainer:
@@ -75,31 +76,32 @@ class ModelTrainer:
         return error_rate,error_list
     
 
+
+@staticmethod
+def calculate_memory_usage_error_rate(y_actual, y_predicted):
+    """
+    Calculate the error rate for memory usage predictions based on the criteria:
+    A prediction is considered an error if it falls between 2^n and 2^(n+1), where 2^n is the largest power of 2 that is less than or equal to the predicted value.
     
-    @staticmethod
-    def calculate_memory_usage_error_rate(y_actual, y_predicted):
-        """
-        Calculate the error rate for memory usage predictions based on the criteria:
-        A prediction is considered an error if it falls outside the +5 and -5 range of the actual value.
+    Args:
+        y_actual (array-like): The actual memory usage values.
+        y_predicted (array-like): The predicted memory usage values.
         
-        Args:
-            y_actual (array-like): The actual memory usage values.
-            y_predicted (array-like): The predicted memory usage values.
-            
-        Returns:
-            float: The error rate.
-            list: The list of errors.
-        """
-        errors = 0
-        error_list = []
-        for actual, predicted in zip(y_actual, y_predicted):
-            actualError = abs(actual - predicted)/actual
-            error_list.append(actualError)
-            if not (actual - 5 <= predicted <= actual + 5):
-                errors += 1
-        
-        error_rate = errors / len(y_actual)
-        return error_rate,error_list
+    Returns:
+        float: The error rate.
+        list: The list of errors.
+    """
+    errors = 0
+    error_list = []
+    for actual, predicted in zip(y_actual, y_predicted):
+        actualError = abs(actual - predicted)/actual
+        error_list.append(actualError)
+        n = math.floor(math.log2(predicted))
+        if not (2**n <= actual <= 2**(n+1)):
+            errors += 1
+    
+    error_rate = errors / len(y_actual)
+    return error_rate, error_list
 
 
 

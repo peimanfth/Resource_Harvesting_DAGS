@@ -1,13 +1,15 @@
 import time
 
+
 clockTicksPerSecond  = 100
 nanoSecondsPerSecond = 1e9
 megabytesPerByte = 1e6
 
 
-def monitor_peak(interval, queue_cpu, queue_mem):
+def monitor_peak(interval, queue_cpu, queue_mem, stop_signal=None):
     
-    while True:
+    while not stop_signal.is_set():
+    # while True:
         # CPU percentage
         prev_cpu_usage = int(open('/sys/fs/cgroup/cpu.stat', 'r').readlines()[0].split()[-1]) * 1000  # Convert from microseconds to nanoseconds
         prev_system_usage = 0
@@ -48,6 +50,5 @@ def monitor_peak(interval, queue_cpu, queue_mem):
         queue_mem.put((mem_timestamp, mem_mb_busy))
         
 
-if __name__ == "__main__":
-    from queue import Queue
-    monitor_peak(0.1, Queue(), Queue())
+# if __name__ == "__main__":
+#     monitor_peak(0.1, Queue(), Queue())

@@ -151,9 +151,22 @@ if __name__ == "__main__":
     
     couch = Couch(COUCHDB_URL, COUCHDB_USERNAME, COUCHDB_PASSWORD)
 
-    # Upload a video file example
+    couch.reset_couchdb_database(ML_DB_NAME, recreate=True),
+    couch.reset_couchdb_database(MR_DB_NAME, recreate=True),
+    couch.reset_couchdb_database(VA_DB_NAME, recreate=True)
+
     video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/car.mp4')
     couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'car.mp4')
+    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tokyo.mp4')
+    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tokyo.mp4')
+    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount.mp4')
+    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount.mp4')
+    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount1.mp4')
+    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount1.mp4')
+    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/snow.mp4')
+    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'snow.mp4')
+    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tree.mp4')
+    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tree.mp4')
 
     # Upload a Wikipedia XML file
     xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/enwiki-latest-pages-articles17.xml')
@@ -162,7 +175,7 @@ if __name__ == "__main__":
     # Upload a digits text file
     digits_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/Digits_Train.txt')
     couch.upload_file_to_couchdb(digits_path, ML_DB_NAME, 'train_digits', 'text/plain', 'digits.txt')
-
+ 
     # Poll for results example
     # result_doc = couch.poll_couchdb_for_results(VA_DB_NAME, 'videos')
     # if result_doc:

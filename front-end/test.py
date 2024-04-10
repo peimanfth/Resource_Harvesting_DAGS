@@ -1,6 +1,7 @@
 from utils import decode_action, encode_action, decodeCpu, decodeMemory, run_cmd, run_shell_command
 from params import *
 from Couch import Couch
+from invoker_v2 import update_Function
 
 
 # for i in range(1, 8*32):
@@ -104,4 +105,8 @@ from Couch import Couch
 
 # update_Function("AES2", 2,2)
 
-print(decodeMemory(42), decodeCpu(42))
+# print(encode_action(2, 40))
+# update_Function("streaming", 2,1)
+# update_Function("decoder", 2,5)
+update_Function("recognition1", 20,3)
+update_Function("recognition2", 6,3)

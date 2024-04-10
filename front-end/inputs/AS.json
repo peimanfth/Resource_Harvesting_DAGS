@@ -4,24 +4,24 @@
       "ignore_certs": true
     },
     "redis": {
-      "uri": "redis://96.125.119.232"
+      "uri": "redis://174.64.28.38"
     }
   },
   "data": {
     "AES1": {
       "length_of_message": 50,
-      "num_of_iterations": 5000,
-      "num_of_processes": 1
+      "num_of_iterations": 4000,
+      "num_of_processes": 2
     },
     "AES2": {
       "length_of_message": 50,
-      "num_of_iterations": 20000,
-      "num_of_processes": 2
+      "num_of_iterations": 16000,
+      "num_of_processes": 4
     },
     "AES3": {
       "length_of_message": 50,
-      "num_of_iterations": 100000,
-      "num_of_processes": 4
+      "num_of_iterations": 36000,
+      "num_of_processes": 6
     }
   }
 }

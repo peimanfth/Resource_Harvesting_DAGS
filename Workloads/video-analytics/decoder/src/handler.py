@@ -4,7 +4,12 @@ import tempfile
 import couchdb
 from utils import COUCHDB_PASSWORD, COUCHDB_URL, COUCHDB_USERNAME
 
+from queue import Queue
+from threading import Thread, Event
+from Monitor import monitor_peak
+
 EXT = '.jpg'
+interval = 0.05
 class VideoDecoder:
     def __init__(self, filename, doc_name, req_ids, fanout_num, db_name):
         self.couch = couchdb.Server(COUCHDB_URL)
@@ -62,9 +67,24 @@ class VideoDecoder:
         print(f"Frame {i} uploaded to document {doc_id} successfully.")
 
 def handler(event, context=None):
+
+    # monitor daemon part 1
+    stop_signal = Event()
+    q_cpu = Queue()
+    q_mem = Queue()
+    t = Thread(
+        target=monitor_peak,
+        args=(interval, q_cpu, q_mem, stop_signal),
+        daemon=True
+    )
+    t.start()
+
     decoder = VideoDecoder(event['video_name']+'.mp4', event['doc_name'], event['request_ids'], event['num_frames'], event['db_name'])
     frames = decoder.decode()
-    num_first_doc = len(frames) // 3
+    if len(frames) == 2:
+        num_first_doc = 1
+    else:
+        num_first_doc = len(frames) // 3
     images = []
 
     for i, frame in enumerate(frames[:num_first_doc]):
@@ -75,11 +95,33 @@ def handler(event, context=None):
         decoder.save_to_couchdb(i, frame, event['request_ids'][1])
     images.append([f'{i}{EXT}' for i in range(num_first_doc, len(frames))])
 
+    stop_signal.set()  # Signal the monitor thread to stop
+    t.join()
+
+    # montor daemon part 2
+    cpu_timestamp = []
+    cpu_usage = []
+    while q_cpu.empty() is False:
+        (timestamp, cpu) = q_cpu.get()
+        cpu_timestamp.append(timestamp)
+        cpu_usage.append(cpu)
+
+    mem_timestamp = []
+    mem_usage = []
+    while q_mem.empty() is False:
+        (timestamp, mem) = q_mem.get()
+        mem_timestamp.append(timestamp)
+        mem_usage.append(mem)
+
     return {
         'request_ids': event['request_ids'],
         'num_frames': len(frames),
         'db_name': 'video-bench',
-        'images': images
+        'images': images,
+         'cpu_timestamp': [str(x) for x in cpu_timestamp],
+        'cpu_usage': [str(x) for x in cpu_usage],
+        'mem_timestamp': [str(x) for x in mem_timestamp],
+        'mem_usage': [str(x) for x in mem_usage]
     }
 
 # if __name__ == "__main__":

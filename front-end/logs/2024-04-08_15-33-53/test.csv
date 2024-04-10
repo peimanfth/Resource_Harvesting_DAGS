@@ -1,0 +1,2 @@
+Unique DAG ID,DAG Input,Function Name,Input Feature,Duration,Parallel Duration,Memory_Allocated,CPU_Allocated,Max Memory Usage,Max CPU Usage,Start Time,End Time,Timeout Status,Input File
+vid-d1b451dc-87da-4698-a055-c3297208cd91,9,streaming,,269,,128,2,0.0,0.0,1712608435567,1712608435836,False,./inputs/vid.json
