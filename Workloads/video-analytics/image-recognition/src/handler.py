@@ -3,7 +3,7 @@ from torchvision.models import SqueezeNet1_1_Weights
 from torchvision import transforms
 import torch
 # from torch.multiprocessing import Process, set_start_method, Queue
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Pool, Manager
 import couchdb
 from utils import COUCHDB_URL, COUCHDB_USERNAME, COUCHDB_PASSWORD
 from PIL import Image
@@ -71,8 +71,21 @@ class ObjectRecognition:
             print(f"Document {doc_name} not found.")
             return None
 
-def handle_single_image(args, result_queue):
-    event, index, context = args
+# def handle_single_image(args, result_queue):
+#     event, index, context = args
+#     model = models.squeezenet1_1(weights=SqueezeNet1_1_Weights.DEFAULT)
+#     recog = ObjectRecognition(model, event['db_name'])
+#     doc_name = event['request_ids'][event['index']]
+#     file_name = event['images'][event['index']][index]
+#     image_bytes = recog.download_image(doc_name, file_name)
+#     print(f'Image downloaded with size {len(image_bytes)}')
+#     if image_bytes:
+#         print(f'Processing image {file_name}')
+#         result = recog.infer(image_bytes)
+#         result_queue.put({"prediction": result, "index": index, "image": file_name})
+#     else:
+#         result_queue.put({"error": "Image not found or failed to download", "index": index})
+def handle_single_image(event, index, context, result_queue):
     model = models.squeezenet1_1(weights=SqueezeNet1_1_Weights.DEFAULT)
     recog = ObjectRecognition(model, event['db_name'])
     doc_name = event['request_ids'][event['index']]
@@ -85,6 +98,7 @@ def handle_single_image(args, result_queue):
         result_queue.put({"prediction": result, "index": index, "image": file_name})
     else:
         result_queue.put({"error": "Image not found or failed to download", "index": index})
+
 
 def handler(event, context=None):
 
@@ -99,19 +113,32 @@ def handler(event, context=None):
     )
     t.start()
 
-    result_queue = Queue()
-    processes = []
-    for index in range(len(event['images'][event['index']])):
-        p = Process(target=handle_single_image, args=((event, index, context), result_queue))
-        processes.append(p)
-        p.start()
+    # result_queue = Queue()
+    # processes = []
+    # for index in range(len(event['images'][event['index']])):
+    #     p = Process(target=handle_single_image, args=((event, index, context), result_queue))
+    #     processes.append(p)
+    #     p.start()
 
-    for p in processes:
-        p.join()
+    # for p in processes:
+    #     p.join()
 
-    results = []
-    while not result_queue.empty():
-        results.append(result_queue.get())
+    # results = []
+    # while not result_queue.empty():
+    #     results.append(result_queue.get())
+
+    NUM_PROCESSES = (event['index'] + 1) * 3
+
+    with Manager() as manager:
+        result_queue = manager.Queue()
+        with Pool(NUM_PROCESSES) as pool:
+            tasks = [(event, i, context, result_queue) for i in range(len(event['images'][event['index']]))]
+            pool.starmap(handle_single_image, tasks)
+
+        results = []
+        while not result_queue.empty():
+            results.append(result_queue.get())
+
 
     stop_signal.set()  # Signal the monitor thread to stop
     t.join()

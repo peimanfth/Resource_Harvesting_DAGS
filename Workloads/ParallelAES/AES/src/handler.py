@@ -45,6 +45,7 @@ def handler(event, context=None):
 
     latencies = {}
     timestamps = {}
+    print(event['params'])
     event = event['params'][f'AES{event["index"]}']
     timestamps["starting_time"] = time()
     length_of_message = event['length_of_message']

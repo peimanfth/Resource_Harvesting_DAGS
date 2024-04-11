@@ -1,0 +1,5 @@
+Unique DAG ID,DAG Input Content,DAG Input Size,Function Name,Function Input,Duration,Parallel Duration,Memory_Allocated,CPU_Allocated,Max Memory Usage,Max CPU Usage,Avg CPU Usage,Start Time,End Time,Timeout Status,Input File
+vid-21e9908f-4cc3-4f33-a0ea-014630aa01e1,tokyo,42,streaming,42,344,,128,1,25.47712,0.00265,0.00265,1712806154581,1712806154925,False,./inputs/vid.json
+vid-21e9908f-4cc3-4f33-a0ea-014630aa01e1,tokyo,42,decoder,42,1692,,640,1,97.325056,1.2192289156626506,0.194542003126533,1712806155442,1712806157134,False,./inputs/vid.json
+vid-21e9908f-4cc3-4f33-a0ea-014630aa01e1,tokyo,42,recognition1,14,9626,31294,2560,4,356.151296,4.548180722891566,0.4936142910761239,1712806158739,1712806168365,False,./inputs/vid.json
+vid-21e9908f-4cc3-4f33-a0ea-014630aa01e1,tokyo,42,recognition2,28,31294,31294,2560,4,468.21376,4.908320987654321,1.9517898297400536,1712806158724,1712806190018,False,./inputs/vid.json

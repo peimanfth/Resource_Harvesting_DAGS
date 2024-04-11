@@ -165,7 +165,7 @@ cp -R src/* build
 cd build
 zip -r index.zip *
 
-wsk -i action update partitioner --kind python:3.10 --main main --memory 4096 --timeout $timeout index.zip
+wsk -i action update partitioner --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip
 
 cd ../../
 

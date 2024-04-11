@@ -24,9 +24,9 @@ def invokeDAG(dag_ID, input,current_time):
     
     # Encode the whole input of the DAG
     if dag_ID == "AS":
-        encoded_dag_input = encode_dag_input(data)
+        size, content = Parallel_AES_input_extractor(data)
     elif dag_ID == "vid":
-        encoded_dag_input = VA_input_extractor(data)
+        size, content = VA_input_extractor(data)
 
     couch = Couch(COUCHDB_URL, COUCHDB_USERNAME, COUCHDB_PASSWORD)
     couch.delete_guest_docs(ACTIVATIONS_DB_NAME)
@@ -57,7 +57,7 @@ def invokeDAG(dag_ID, input,current_time):
     # with open(csv_file_name, 'a', newline='') as csvfile:
     with open(os.path.join(csv_dir, csv_file_name), 'a', newline='') as csvfile:
         # Define the CSV column names
-        fieldnames = ['Unique DAG ID','DAG Input', 'Function Name', "Input Feature", 'Duration','Parallel Duration', 'Memory_Allocated', 'CPU_Allocated','Max Memory Usage', 'Max CPU Usage','Avg CPU Usage', 'Start Time', 'End Time', 'Timeout Status', 'Input File']
+        fieldnames = ['Unique DAG ID','DAG Input Content', 'DAG Input Size', 'Function Name', "Function Input", 'Duration','Parallel Duration', 'Memory_Allocated', 'CPU_Allocated','Max Memory Usage', 'Max CPU Usage','Avg CPU Usage', 'Start Time', 'End Time', 'Timeout Status', 'Input File']
         # Create a CSV DictWriter object
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
@@ -112,14 +112,18 @@ def invokeDAG(dag_ID, input,current_time):
             end_time = doc.get('end')
             
             # input_feature  = feature_encoder(input_dict[key]) if input_dict[key] else None
-            # print(input_dict.
+
             if dag_ID == "AS":
-                if input_dict.get(key) is not None:
-                    input_feature = feature_encoder(input_dict[key])
+                if input_dict.get('params') is not None and key in input_dict['params']:
+                    input_feature = Parallel_AES_AES_input_extractor(input_dict['params'][key])
                 else:
-                    input_feature = None
+                    input_feature = size
             elif dag_ID == "vid":
-                input_feature = VA_ImgRec_input_extractor(input_dict, USER_CONFIG[dag_ID]["Functions"][key]['idx'])
+                if USER_CONFIG[dag_ID]["Functions"][key]['idx'] is not None:
+                    input_feature = VA_ImgRec_input_extractor(input_dict, USER_CONFIG[dag_ID]["Functions"][key]['idx'])
+                else:
+                    input_feature = size
+
 
 
 
@@ -131,10 +135,11 @@ def invokeDAG(dag_ID, input,current_time):
             # Write data to the CSV file
             writer.writerow({
                 'Unique DAG ID': unique_dag_id,
-                'DAG Input':  encoded_dag_input,
+                'DAG Input Content':  content,
+                'DAG Input Size': size,
                 'Function Name': key,
                 # 'Parallelism': key['num_of_processes'],
-                "Input Feature": input_feature,
+                "Function Input": input_feature,
                 'Duration': duration,
                 'Parallel Duration': parallel_duration,
                 'Memory_Allocated': memory_allocated,
@@ -212,6 +217,17 @@ def VA_ImgRec_input_extractor(input_features,idx):
 
     return len(input_features['images'][idx])
 
+def Parallel_AES_AES_input_extractor(input_features):
+    """
+    Extracts the input features from the function input for the Parallel AES function.
+    Args:
+    - input_features (dict): A dictionary containing the input features to be encoded.
+
+    Returns:
+    - int: for now the function returns the number of processes for this function
+    """
+    return input_features['num_of_iterations']
+
 def VA_input_extractor(input_features):
     """
     Extracts the input features from the input JSON for the Video Analytics DAG.
@@ -223,7 +239,18 @@ def VA_input_extractor(input_features):
     - int: for now the function returns the number of frames in the video
     """
     
-    return input_features["num_frames"]
+    return input_features["num_frames"], input_features["video"]
+
+def Parallel_AES_input_extractor(input_features):
+    """
+    Extracts the input features from the function input for the Parallel AES function.
+    Args:
+    - input_features (dict): A dictionary containing the input features to be encoded.
+
+    Returns:
+    - int: for now the function returns the number of processes for this function
+    """
+    return input_features['num_of_iterations'], input_features['length_of_message']
 
 def encode_dag_input(data):
     """
@@ -292,9 +319,15 @@ def feature_decoder(encoded_value):
 if __name__ == "__main__":
     dag_ID = "vid"
     current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    # update_Function("wait1", 1, 1)
     # update_Function("AES1", 2,8)
     # update_Function("AES2", 2,8)
     # update_Function("AES3", 2,8)
+    # update_Function("Stats", 1, 1)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 8)
+    # update_Function("recognition2", 20, 8)
   
     # inputs_dir = "./newinput"
     
@@ -343,33 +376,99 @@ if __name__ == "__main__":
     # update_Function("recognition2", 20, 4)
     # result = invokeDAG(dag_ID, input, current_time)
 
-    update_Function("streaming", 1, 1)
-    update_Function("decoder", 5, 1)
-    update_Function("recognition1", 20, 2)
-    update_Function("recognition2", 20, 2)
-    result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 2)
+    # update_Function("recognition2", 20, 2)
+    # result = invokeDAG(dag_ID, input, current_time)
 
-    update_Function("streaming", 1, 1)
-    update_Function("decoder", 5, 1)
-    update_Function("recognition1", 20, 2)
-    update_Function("recognition2", 20, 2)
-    result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
 
-    update_Function("streaming", 1, 1)
-    update_Function("decoder", 5, 1)
-    update_Function("recognition1", 20, 2)
-    update_Function("recognition2", 20, 2)
-    result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 6)
+    # update_Function("recognition2", 20, 6)
+    # result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 8)
+    # update_Function("recognition2", 20, 8)
+    # result = invokeDAG(dag_ID, input, current_time)
+
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 2)
+    # update_Function("recognition2", 20, 2)
+    # result = invokeDAG(dag_ID, input, current_time)
+
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
+
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 6)
+    # update_Function("recognition2", 20, 6)
+    # result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 8)
+    # update_Function("recognition2", 20, 8)
+    # result = invokeDAG(dag_ID, input, current_time)
 
 
+
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
     # time.sleep(60)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 4)
+    # update_Function("recognition2", 20, 4)
+    # result = invokeDAG(dag_ID, input, current_time)
+    update_Function("streaming", 1, 1)
+    update_Function("decoder", 5, 1)
+    update_Function("recognition1", 20, 6)
+    update_Function("recognition2", 20, 6)
+    result = invokeDAG(dag_ID, input, current_time)
+
+
+
+
+    # # time.sleep(60)
     # dag_ID = "AS"
-    # input = "./inputs/AS.json"
+    # input = "./inputs/AS1.json"
     # update_Function("wait1", 1, 1)
     # update_Function("AES1", 1, 6)
     # update_Function("AES2", 1, 6)
     # update_Function("AES3", 1, 6)
     # update_Function("Stats", 1, 1)
+    # result = invokeDAG(dag_ID, input, current_time)
+    # dag_ID = "vid"
+    # input = "./inputs/assa.json"
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 6)
+    # update_Function("recognition2", 20, 6)
     # result = invokeDAG(dag_ID, input, current_time)
 
     # update_Function("wait1", 1, 1)

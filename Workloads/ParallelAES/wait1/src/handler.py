@@ -23,6 +23,27 @@ def handler(event, context=None):
     )
     t.start()
 
+    event_data = event['data']
+    length_of_message = event_data['length_of_message']
+    num_of_iterations = event_data['num_of_iterations']
+    data = {
+        "AES1": {
+            "length_of_message": length_of_message,
+            "num_of_iterations": num_of_iterations * 1 * 1,
+            "num_of_processes": 1
+        },
+        "AES2": {
+            "length_of_message": length_of_message,
+            "num_of_iterations": num_of_iterations * 2 * 2,
+            "num_of_processes": 2
+        },
+        "AES3": {
+            "length_of_message": length_of_message,
+            "num_of_iterations": num_of_iterations * 3 * 3,
+            "num_of_processes": 3
+        }
+    }
+
     time.sleep(1)
 
     stop_signal.set()  # Signal the monitor thread to stop
@@ -44,7 +65,7 @@ def handler(event, context=None):
         mem_usage.append(mem)
 
     return {
-        'params': event['data'],
+        'params': data,
         'cpu_timestamp': [str(x) for x in cpu_timestamp],
         'cpu_usage': [str(x) for x in cpu_usage],
         'mem_timestamp': [str(x) for x in mem_timestamp],
