@@ -58,6 +58,6 @@ def handler(event, context=None):
 if __name__ == "__main__":
     event = {
         "video": "tokyo",
-        "num_frames": 3
+        "num_frames": 51
     }
     print(handler(event))

@@ -61,35 +61,50 @@ class ObjectRecognition:
             print(f"Document {doc_name} not found.")
             return None
 
-def handle_single_image(event, index, context, result_queue):
-    model = models.squeezenet1_1(weights=SqueezeNet1_1_Weights.DEFAULT)
-    recog = ObjectRecognition(model, event['db_name'])
-    doc_name = event['request_ids'][event['index']]
-    file_name = event['images'][event['index']][index]
-    image_bytes = recog.download_image(doc_name, file_name)
-    print(f'Image downloaded with size {len(image_bytes)}')
-    if image_bytes:
-        print(f'Processing image {file_name}')
-        result = recog.infer(image_bytes)
-        result_queue.put({"prediction": result, "index": index, "image": file_name})
-    else:
-        result_queue.put({"error": "Image not found or failed to download", "index": index})
+def handle_images(events, context, result_queue):
+    for event, index in events:
+        model = models.squeezenet1_1(weights=SqueezeNet1_1_Weights.DEFAULT)
+        recog = ObjectRecognition(model, event['db_name'])
+        doc_name = event['request_ids'][event['index']]
+        file_name = event['images'][event['index']][index]
+        image_bytes = recog.download_image(doc_name, file_name)
+        print(f'Image downloaded with size {len(image_bytes)}')
+        if image_bytes:
+            print(f'Processing image {file_name}')
+            result = recog.infer(image_bytes)
+            result_queue.put({"prediction": result, "index": index, "image": file_name})
+        else:
+            result_queue.put({"error": "Image not found or failed to download", "index": index})
 
-def handler(event, context=None):
+def handler(event, context=None, num_processes=6):
     with Manager() as manager:
         result_queue = manager.Queue()
-        with Pool(NUM_PROCESSES) as pool:
-            tasks = [(event, i, context, result_queue) for i in range(len(event['images'][event['index']]))]
-            pool.starmap(handle_single_image, tasks)
+        processes = []
+        task_list = [(event, i) for i in range(len(event['images'][event['index']]))]
+
+        # Distributing tasks among the fixed number of processes
+        tasks_per_process = len(task_list) // num_processes
+        for i in range(num_processes):
+            start_index = i * tasks_per_process
+            if i == num_processes - 1:  # Ensure last process gets all remaining tasks
+                end_index = len(task_list)
+            else:
+                end_index = start_index + tasks_per_process
+            process_task_list = task_list[start_index:end_index]
+            p = Process(target=handle_images, args=(process_task_list, context, result_queue))
+            processes.append(p)
+            p.start()
+
+        for p in processes:
+            p.join()
 
         results = []
         while not result_queue.empty():
             results.append(result_queue.get())
 
         return {
-            f'Recognition_{event["index"]}': results,
+            f'Recognition_{event["index"]}': results
         }
-
 if __name__ == "__main__":
     start_time = time.time()
     event = {'request_ids': ['39a9c8a2-b278-479e-b49a-bd0df702c866-recog1', '39a9c8a2-b278-479e-b49a-bd0df702c866-recog2'], 'num_frames': 51, 'db_name': 'video-bench', 'images': [['0.jpg', '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg', '10.jpg', '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg'], ['17.jpg', '18.jpg', '19.jpg', '20.jpg', '21.jpg', '22.jpg', '23.jpg', '24.jpg', '25.jpg', '26.jpg', '27.jpg', '28.jpg', '29.jpg', '30.jpg', '31.jpg', '32.jpg', '33.jpg', '34.jpg', '35.jpg', '36.jpg', '37.jpg', '38.jpg', '39.jpg', '40.jpg', '41.jpg', '42.jpg', '43.jpg', '44.jpg', '45.jpg', '46.jpg', '47.jpg', '48.jpg', '49.jpg', '50.jpg']], 'index': 1}
@@ -99,4 +114,3 @@ if __name__ == "__main__":
     print(results)
     with open('results.json', 'w') as f:
         f.write(str(results))
-

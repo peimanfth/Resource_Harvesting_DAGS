@@ -94,5 +94,5 @@ def handler(event, context=None):
     }
 
 if __name__ == "__main__":
-    res = handler({'video_name': 'tokyo', 'num_frames': 3, 'db_name': 'video-bench', 'doc_name': 'videos', 'request_ids': ['eb15f4ba-c62f-4ffe-98c4-ada3f58128e3-recog1', 'eb15f4ba-c62f-4ffe-98c4-ada3f58128e3-recog2']})
+    res = handler({'video_name': 'tokyo', 'num_frames': 51, 'db_name': 'video-bench', 'doc_name': 'videos', 'request_ids': ['39a9c8a2-b278-479e-b49a-bd0df702c866-recog1', '39a9c8a2-b278-479e-b49a-bd0df702c866-recog2']})
     print(res)
