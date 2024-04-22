@@ -15,13 +15,35 @@ class ModelTrainer:
         y = df[targets].fillna(0)  # Fill NaN values in targets with 0
 
         # One-hot encode categorical features if necessary
-        if 'Function Name' in features:
+        if 'Function Name'  in features and 'Function Input'in features:
             X_encoded = self.encoder.fit_transform(X[['Function Name']])
             X_encoded = pd.DataFrame(X_encoded, columns=self.encoder.get_feature_names_out(['Function Name']))
-            X_encoded['Input Feature'] = X['Input Feature'].values
+            X_encoded['Function Input'] = X['Function Input'].values
+            X = X_encoded
+        elif 'DAG Input Size' in features and 'Function Name' in features:
+            X_encoded = self.encoder.fit_transform(X[['Function Name']])
+            X_encoded = pd.DataFrame(X_encoded, columns=self.encoder.get_feature_names_out(['Function Name']))
+            X_encoded['DAG Input Size'] = X['DAG Input Size'].values
             X = X_encoded
 
         return X, y
+    
+    def prepare_inference_data(self, df, features, x=None):
+        X = df[features].fillna(0)
+
+        # One-hot encode categorical features if necessary
+        if 'Function Name' in features and 'DAG Input Size' in features:
+            X_encoded = self.encoder.fit_transform(X[['Function Name']])
+            X_encoded = pd.DataFrame(X_encoded, columns=self.encoder.get_feature_names_out(['Function Name']))
+            X_encoded['DAG Input Size'] = X['DAG Input Size'].values
+            X = X_encoded
+        elif 'Predicted Input Size' in features and 'Function Name' in features:
+            X_encoded = self.encoder.fit_transform(X[['Function Name']])
+            X_encoded = pd.DataFrame(X_encoded, columns=self.encoder.get_feature_names_out(['Function Name']))
+            X_encoded['Predicted Input Size'] = X['Predicted Input Size'].values
+            X = X_encoded
+        
+        return X
 
     def fit(self, X, y):
         if isinstance(y, pd.DataFrame):
@@ -77,31 +99,57 @@ class ModelTrainer:
     
 
 
-@staticmethod
-def calculate_memory_usage_error_rate(y_actual, y_predicted):
-    """
-    Calculate the error rate for memory usage predictions based on the criteria:
-    A prediction is considered an error if it falls between 2^n and 2^(n+1), where 2^n is the largest power of 2 that is less than or equal to the predicted value.
-    
-    Args:
-        y_actual (array-like): The actual memory usage values.
-        y_predicted (array-like): The predicted memory usage values.
+    @staticmethod
+    def calculate_memory_usage_error_rate(y_actual, y_predicted):
+        """
+        Calculate the error rate for memory usage predictions based on the criteria:
+        A prediction is considered an error if it falls between 2^n and 2^(n+1), where 2^n is the largest power of 2 that is less than or equal to the predicted value.
         
-    Returns:
-        float: The error rate.
-        list: The list of errors.
-    """
-    errors = 0
-    error_list = []
-    for actual, predicted in zip(y_actual, y_predicted):
-        actualError = abs(actual - predicted)/actual
-        error_list.append(actualError)
-        n = math.floor(math.log2(predicted))
-        if not (2**n <= actual <= 2**(n+1)):
-            errors += 1
+        Args:
+            y_actual (array-like): The actual memory usage values.
+            y_predicted (array-like): The predicted memory usage values.
+            
+        Returns:
+            float: The error rate.
+            list: The list of errors.
+        """
+        errors = 0
+        error_list = []
+        for actual, predicted in zip(y_actual, y_predicted):
+            actualError = abs(actual - predicted)/actual
+            error_list.append(actualError)
+            n = math.floor(math.log2(predicted))
+            if not (2**n <= actual <= 2**(n+1)):
+                errors += 1
+        
+        error_rate = errors / len(y_actual)
+        return error_rate, error_list
     
-    error_rate = errors / len(y_actual)
-    return error_rate, error_list
+    @staticmethod
+    def calculate_input_size_error_rate(y_actual, y_predicted):
+        """
+        Calculate the error rate for input size predictions based on the criteria:
+        If the predicted value falls in the integer range of the actual value, then it is not an error.
+        
+        Args:
+            y_actual (array-like): The actual input size values.
+            y_predicted (array-like): The predicted input size values.
+            
+        Returns:
+            float: The error rate.
+            list: The list of errors.
+        """
+        errors = 0
+        error_list = []
+        for actual, predicted in zip(y_actual, y_predicted):
+            actualError = abs(actual - predicted)/actual
+            error_list.append(actualError)
+            # Check if predicted falls outside the 200 integer range of actual
+            if not (int(actual) - 500 <= predicted < int(actual) + 500):
+                errors += 1
+        
+        error_rate = errors / len(y_actual)
+        return error_rate,error_list
 
 
 

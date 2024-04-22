@@ -1,0 +1,12 @@
+{
+    "$composer": {
+        "openwhisk": {
+            "ignore_certs": true
+        },
+        "redis": {
+            "uri": "redis://10.0.79.93"
+        }
+    },
+    "video": "tokyo",
+    "num_frames": 67
+}

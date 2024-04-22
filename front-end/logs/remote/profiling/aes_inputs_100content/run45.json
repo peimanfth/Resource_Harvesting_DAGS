@@ -1,0 +1,14 @@
+{
+    "$composer": {
+        "openwhisk": {
+            "ignore_certs": true
+        },
+        "redis": {
+            "uri": "redis://10.0.79.93"
+        }
+    },
+    "data": {
+        "length_of_message": 100,
+        "num_of_iterations": 6400
+    }
+}

@@ -141,6 +141,6 @@ ML_DB_NAME = 'ml-pipeline'
 ACTIVATIONS_DB_NAME = 'whisk_local_activations'
 COUCHDB_PASSWORD = 'some_passw0rd'
 COUCHDB_USERNAME = 'whisk_admin'
-MODELS_DIR = 'models'
+MODELS_DIR = 'models/remote'
 
 
