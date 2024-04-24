@@ -52,24 +52,7 @@ class SimpleNN(nn.Module):
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-# Define a function to train and evaluate a model
-# def train_and_evaluate_model(model_class, model_name, X_train, y_train, X_test, y_test):
-#     print(f"Training and evaluating {model_name}")
-#     if model_name == "XGBoost":
-#         trainer = ModelTrainer(model_class())
-#     else:
-#         trainer = ModelTrainer(model_class())
-#     trainer.fit(X_train, y_train)
-#     y_pred = trainer.predict(X_test)
-#     trainer.evaluate(y_test, y_pred)
-#     # cpu_error_rate = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
-#     # mem_error_rate = ModelTrainer.calculate_memory_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
-#     # print(f"{model_name} CPU Usage Error Rate: {cpu_error_rate:.2%}")
-#     # print(f"{model_name} Memory Usage Error Rate: {mem_error_rate:.2%}")
-#     # Save the model and encoder
-#     trainer.save_model(os.path.join(MODELS_DIR, f'model_{model_name}.pkl'))
-#     trainer.save_encoder(os.path.join(MODELS_DIR, f'encoder_{model_name}.pkl'))
-#     return y_pred
+
 def train_and_evaluate_model(model_class, model_name, X_train, y_train, X_test, y_test, target):
     print(f"Training and evaluating {model_name}")
     start_time = time.time()
@@ -127,13 +110,10 @@ def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test
     
     return y_pred.cpu().numpy(), training_time, inference_time
 
-if __name__ == '__main__':
-    df = pd.read_csv('./logs/remote/2024-04-11_20-31-11/aes100.csv')
-
-    # train_df = df.iloc[:1200]
-    # test_df = df.iloc[1200:]
-    #split train and test data
+def inputPrediction(df, models):
+ 
     train_df = df.sample(frac=0.8, random_state=42)
+    print(train_df.shape)
     print(train_df.shape)
     test_df = df.drop(train_df.index)
     print(test_df.shape)
@@ -143,17 +123,6 @@ if __name__ == '__main__':
     # targets = ['Duration', 'Max CPU Usage', 'Max Memory Usage']
     targets = ['Function Input']
     
-
-    # Models to compare
-    models = {
-        "RandomForest": RandomForestRegressor,
-        "LinearRegression": LinearRegression,
-        "DecisionTree": DecisionTreeRegressor,
-        "SVR": SVR,
-        "XGBoost": XGBRegressor,
-        "BasicNN": SimpleNN(input_size=6)
-    }
-
     results = {}
     error_directory = "./logs/remote/errors"
     os.makedirs(error_directory, exist_ok=True)
@@ -190,22 +159,83 @@ if __name__ == '__main__':
             results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": err}
     time_df = pd.DataFrame(time_results)
     os.makedirs('./logs/remote/times', exist_ok=True)
-    time_df.to_csv('./logs/remote/times/model_time_statistics.csv', index=False)
-    # for target in targets:
-    #     print(f"\n----- Evaluating for target: {target} -----")
-    #     X_train, y_train = ModelTrainer(None).prepare_data(train_df, features, [target])
-    #     X_test, y_test = ModelTrainer(Nohttps://www.youtube.comn/ne).prepare_data(test_df, features, [target])
+    time_df.to_csv('./logs/remote/times/model_time_statistics_InputSize.csv', index=False)
+
+def utilPrediction(df, models):
+  
+    train_df = df.sample(frac=0.8, random_state=42)
+    print(train_df.shape)
+    test_df = df.drop(train_df.index)
+    print(test_df.shape)
+
+    features = ['Function Name', 'Function Input']
+
+    # targets = ['Duration', 'Max CPU Usage', 'Max Memory Usage']
+    targets = ['Max CPU Usage', 'Max Memory Usage']
+    
+
+    results = {}
+    error_directory = "./logs/remote/errors"
+    os.makedirs(error_directory, exist_ok=True)
+
+    time_results = []
+
+    for target in targets:
+        print(f"\n----- Evaluating for target: {target} -----")
+        X_train, y_train = ModelTrainer(None).prepare_data(train_df, features, [target])
+        X_test, y_test = ModelTrainer(None).prepare_data(test_df, features, [target])
         
-    #     for model_name, model_class in models.items():
-    #         print(f"\nTraining and evaluating {model_name} for {target}")
-    #         trainer = ModelTrainer(model_class(random_state=42) if model_name != "SVR" else model_class())
-    #         trainer.fit(X_train, y_train)
-    #         y_pred = trainer.predict(X_test)
-    #         trainer.evaluate(y_test, y_pred)
-    #         error_rate = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
-    #         print(f"{model_name} {target} CPU Usage Error Rate: {error_rate:.2%}")
-    #         # Save the model and encoder
-    #         trainer.save_model(os.path.join(models_dir, f'model_{model_name}_{target}.pkl'))
-    #         trainer.save_encoder(os.path.join(models_dir, f'encoder_{model_name}_{target}.pkl'))
-    #         # Store results for further analysis if needed
-    #         results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": error_rate}
+        for model_name, model_class in models.items():
+            err = None
+            start_time = time.time()
+            if model_name == "BasicNN":
+                y_pred, training_time, inference_time = train_and_evaluate_model_pytorch(model_class, model_name, X_train, y_train, X_test, y_test,target)
+            else:
+                y_pred, training_time, inference_time = train_and_evaluate_model(model_class, model_name, X_train, y_train, X_test, y_test, target)
+            total_time = time.time() - start_time
+            if target == "Max CPU Usage":
+                cpu_err, cpu_err_list = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
+                error_df = pd.DataFrame(cpu_err_list)
+                # write the error list to a csv file in the error directory
+                error_df.to_csv(f'{error_directory}/{model_name}_cpu_error_list.csv', index=False)
+                err = cpu_err
+                print(f"{model_name} {target} CPU Usage Error Rate: {cpu_err:.2%}")
+            elif target == "Max Memory Usage":
+                mem_err, mem_err_list = ModelTrainer.calculate_memory_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
+                error_df = pd.DataFrame(mem_err_list)
+                # write the error list to a csv file in the error directory
+                error_df.to_csv(f'{error_directory}/{model_name}_memory_error_list.csv', index=False)
+                err = mem_err
+                print(f"{model_name} {target} Memory Usage Error Rate: {mem_err:.2%}")
+
+            time_results.append({
+                "Model": model_name,
+                "Target": target,
+                "Training Time": training_time,
+                "Inference Time": inference_time,
+                "Total Time": total_time
+            })
+            results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": err}
+    time_df = pd.DataFrame(time_results)
+    os.makedirs('./logs/remote/times', exist_ok=True)
+    time_df.to_csv('./logs/remote/times/model_time_statistics_Utilization.csv', index=False)
+   
+
+if __name__ == '__main__':
+    # The profiling data. We should generate distinct profiling data for each DAG
+    df = pd.read_csv('./logs/remote/2024-04-11_20-31-11/aes100.csv')
+
+
+
+    # Models to compare
+    models = {
+        "RandomForest": RandomForestRegressor,
+        "LinearRegression": LinearRegression,
+        "DecisionTree": DecisionTreeRegressor,
+        "SVR": SVR,
+        "XGBoost": XGBRegressor,
+        "BasicNN": SimpleNN(input_size=6)
+    }
+    inputPrediction(df, models)
+
+    utilPrediction(df, models)

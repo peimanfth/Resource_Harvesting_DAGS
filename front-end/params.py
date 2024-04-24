@@ -1,3 +1,6 @@
+import joblib
+import os
+
 MEMORY_CAP_PER_FUNCTION = 32
 CPU_CAP_PER_FUNCTION = 8
 MEM_UNIT = 128
@@ -142,5 +145,13 @@ ACTIVATIONS_DB_NAME = 'whisk_local_activations'
 COUCHDB_PASSWORD = 'some_passw0rd'
 COUCHDB_USERNAME = 'whisk_admin'
 MODELS_DIR = 'models/remote'
+input_size_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Function Input.pkl')  # Example model for Input Size
+cpu_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Max CPU Usage.pkl')  # Example model for CPU
+mem_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Max Memory Usage.pkl')  # Example model for Memory
+
+
+cpu_model = joblib.load(cpu_model_path)
+mem_model = joblib.load(mem_model_path)
+size_model = joblib.load(input_size_model_path)
 
 

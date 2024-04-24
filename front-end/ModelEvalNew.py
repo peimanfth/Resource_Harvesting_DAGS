@@ -199,21 +199,4 @@ if __name__ == '__main__':
     time_df = pd.DataFrame(time_results)
     os.makedirs('./logs/remote/times', exist_ok=True)
     time_df.to_csv('./logs/remote/times/model_time_statistics.csv', index=False)
-    # for target in targets:
-    #     print(f"\n----- Evaluating for target: {target} -----")
-    #     X_train, y_train = ModelTrainer(None).prepare_data(train_df, features, [target])
-    #     X_test, y_test = ModelTrainer(Nohttps://www.youtube.comn/ne).prepare_data(test_df, features, [target])
-        
-    #     for model_name, model_class in models.items():
-    #         print(f"\nTraining and evaluating {model_name} for {target}")
-    #         trainer = ModelTrainer(model_class(random_state=42) if model_name != "SVR" else model_class())
-    #         trainer.fit(X_train, y_train)
-    #         y_pred = trainer.predict(X_test)
-    #         trainer.evaluate(y_test, y_pred)
-    #         error_rate = ModelTrainer.calculate_cpu_usage_error_rate(ensure_1d_array(y_test), ensure_1d_array(y_pred))
-    #         print(f"{model_name} {target} CPU Usage Error Rate: {error_rate:.2%}")
-    #         # Save the model and encoder
-    #         trainer.save_model(os.path.join(models_dir, f'model_{model_name}_{target}.pkl'))
-    #         trainer.save_encoder(os.path.join(models_dir, f'encoder_{model_name}_{target}.pkl'))
-    #         # Store results for further analysis if needed
-    #         results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": error_rate}
+   
