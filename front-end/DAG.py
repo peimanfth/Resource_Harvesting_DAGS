@@ -1,7 +1,12 @@
 
-from params import USER_CONFIG
+# import time
+from params import USER_CONFIG, size_model, mem_model, cpu_model
+import pandas as pd
+from ModelTrainer import ModelTrainer
+from FunctionEntity import FunctionEntity
 
 class DAG:
+    
     def __init__(self, dag_id):
         config = USER_CONFIG.get(dag_id, {})
         self.dag_id = dag_id
@@ -20,62 +25,91 @@ class DAG:
             )
 
     def add_function(self, function_name, user_memory, user_cpu, stage):
-        function_details = {
-            'function_name': function_name,
-            'user_memory': user_memory,
-            'user_cpu': user_cpu,
-            'stage': stage
-        }
-        self.functions.append(function_details)
+        function_entity = FunctionEntity(
+            dag_id=self.dag_id,
+            function_name=function_name,
+            memory_allocated=user_memory,
+            cpu_allocated=user_cpu,
+            # Add other parameters as needed
+        )
+        self.functions.append(function_entity)
+
+
+
+    def PredictPipeline(self):
+
+        FunctionsList = self.get_function_names()
+        DAGinputSizeList = [self.get_input_size()] * len(FunctionsList)
+        dict = {'Function Name': FunctionsList, 'DAG Input Size': DAGinputSizeList}
+        print(dict)
+        request = pd.DataFrame(dict)
+
+        features = ['DAG Input Size', 'Function Name']
+        # target = 'Function Input'
+
+
+        X_new = ModelTrainer(None).prepare_inference_data(request, features)
+
+        request['Predicted Input Size'] = size_model.predict(X_new)
+        X_new['Predicted Input Size'] = request['Predicted Input Size'].values
+            
+        # Assuming 'ModelTrainer' or similar utility for data preparation is available
+        # Prepare data (ensure the feature names and model input match training setup)
+        features = ['Function Name', 'Predicted Input Size']  
+        # target = 'Max CPU Usage'
+        X_new = ModelTrainer(None).prepare_inference_data(request, features)
+
+        #change column name from  Predicted Input Size to Function Input
+        X_new = X_new.rename(columns = {'Predicted Input Size':'Function Input'})
+        request['Predicted Max CPU Usage'] = cpu_model.predict(X_new)
+        request['Predicted Max Memory Usage'] = mem_model.predict(X_new)
+        for function in self.functions:
+            
+            function.set_predicted_input_size(request['Predicted Input Size'][request['Function Name'] == function.function_name].values[0])
+            function.set_predicted_max_cpu_usage(request['Predicted Max CPU Usage'][request['Function Name'] == function.function_name].values[0])
+            function.set_predicted_max_memory_usage(request['Predicted Max Memory Usage'][request['Function Name'] == function.function_name].values[0])
+    
+    #setters
 
     def set_input_file(self, input_file):
         self.input_file = input_file
 
     def set_input_size(self, input_size):
         self.input_size = input_size
-class FunctionEntity:
-    def __init__(self, dag_id, input_content=None, input_size=None, function_name=None,
-                 function_input=None, duration=None, parallel_duration=None, 
-                 memory_allocated=None, cpu_allocated=None, max_memory_usage=None,
-                 max_cpu_usage=None, avg_cpu_usage=None, start_time=None, 
-                 end_time=None, timeout_status=None, input_file=None, 
-                 predicted_input_size=None, predicted_max_cpu_usage=None, 
-                 predicted_max_memory_usage=None):
-        self.dag_id = dag_id
-        self.input_content = input_content
-        self.input_size = input_size
-        self.function_name = function_name
-        self.function_input = function_input
-        self.duration = duration
-        self.parallel_duration = parallel_duration
-        self.memory_allocated = memory_allocated
-        self.cpu_allocated = cpu_allocated
-        self.max_memory_usage = max_memory_usage
-        self.max_cpu_usage = max_cpu_usage
-        self.avg_cpu_usage = avg_cpu_usage
-        self.start_time = start_time
-        self.end_time = end_time
-        self.timeout_status = timeout_status
-        self.input_file = input_file
-        self.predicted_input_size = predicted_input_size
-        self.predicted_max_cpu_usage = predicted_max_cpu_usage
-        self.predicted_max_memory_usage = predicted_max_memory_usage
 
-    def __repr__(self):
-        return f"<FunctionEntity {self.function_name} CPU: {self.cpu_allocated} Mem: {self.memory_allocated}>"
+    #getters
 
+    def get_function_names(self):
+        return [function.function_name for function in self.functions]
     
 
+    def get_input_size(self):
+        return self.input_size
 
-dag = DAG('AS')
+if __name__ == "__main__":
+    dag = DAG('AS')
+    dag.set_input_size(5000)
+    dag.PredictPipeline()
+    for function in dag.functions:
+        print(function)
+        print(function.get_predicted_input_size())
+        print(function.get_predicted_max_cpu_usage())
+        print(function.get_predicted_max_memory_usage())
 
 
-print(f"DAG ID: {dag.dag_id}")
-print(f"Overall Memory: {dag.memory}")
-print(f"Overall CPU: {dag.cpu}")
-print(f"Configuration File: {dag.input_file}")
-for function in dag.functions:
-    print(f"Function Name: {function['function_name']}")
-    print(f"  Memory Allocated: {function['user_memory']}")
-    print(f"  CPU Allocated: {function['user_cpu']}")
-    print(f"  Stage: {function['stage']}")
+# dag = DAG('AS')
+
+
+
+# print(f"DAG ID: {dag.dag_id}")
+# print(f"Overall Memory: {dag.memory}")
+# print(f"Overall CPU: {dag.cpu}")
+# print(f"Configuration File: {dag.input_file}")
+# for function in dag.functions:
+#     print(f"Function Name: {function.function_name}")
+#     print(f"  Memory Allocated: {function.memory_allocated}")
+#     print(f"  CPU Allocated: {function.cpu_allocated}")
+#     print(f"  Stage: {function.stage}")
+# # list of all function names
+# print(dag.get_function_names())
+# print(dag.functions)

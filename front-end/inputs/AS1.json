@@ -9,6 +9,6 @@
   },
   "data": {
     "length_of_message": 50,
-    "num_of_iterations": 12000
+    "num_of_iterations": 5000
   }
 }

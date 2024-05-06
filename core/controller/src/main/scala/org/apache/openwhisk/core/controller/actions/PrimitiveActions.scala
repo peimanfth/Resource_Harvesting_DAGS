@@ -171,7 +171,7 @@ protected[actions] trait PrimitiveActions {
         .getOrElse(LoggingMarkers.CONTROLLER_ACTIVATION),
       logLevel = InfoLevel)
     val startLoadbalancer =
-      transid.started(this, LoggingMarkers.CONTROLLER_LOADBALANCER, s"action activation id: ${activationId}")
+      transid.started(this, LoggingMarkers.CONTROLLER_LOADBALANCER, s"action activation id: ${activationId} with cause: $cause")
 
     val keySet = payload match {
       case Some(JsObject(fields)) => Some(fields.keySet)
@@ -296,7 +296,7 @@ protected[actions] trait PrimitiveActions {
       accounting = accounting.getOrElse(CompositionAccounting()), // share accounting with caller
       logs = Buffer.empty)
 
-    logging.info(this, s"invoking composition $action topmost ${cause.isEmpty} activationid '${session.activationId}'")
+    logging.info(this, s"invoking composition $action topmost ${cause.isEmpty} activationid '${session.activationId}' with cause '$cause'")
 
     val response: Future[Either[ActivationId, WhiskActivation]] =
       invokeConductor(user, payload, session, transid).map(response =>
@@ -332,6 +332,7 @@ protected[actions] trait PrimitiveActions {
                               parentTid: TransactionId): Future[ActivationResponse] = {
 
     implicit val transid: TransactionId = TransactionId.childOf(parentTid)
+    // logging.error(this, s"invoking conductor action ${session.action} activationid '${session.activationId}'")
 
     if (session.accounting.conductors > 2 * actionSequenceLimit) {
       // composition is too long
@@ -473,6 +474,8 @@ protected[actions] trait PrimitiveActions {
     val exec = action.toExecutableWhiskAction
     val activationResponse: Future[Either[ActivationId, WhiskActivation]] = exec match {
       case Some(action) if action.annotations.isTruthy(WhiskActivation.conductorAnnotation) => // composition
+        //log the component action
+        logging.info(this, s"invoking component Composition Action $action activationid '${session.activationId}'")
         // invokeComposition will increase the invocation counts
         invokeComposition(
           user,
@@ -483,6 +486,8 @@ protected[actions] trait PrimitiveActions {
           accounting = Some(session.accounting))
       case Some(action) => // primitive action
         session.accounting.components += 1
+        //log the component action
+        logging.info(this, s"invoking component Simple Action $action activationid '${session.activationId}'")
         invokeSimpleAction(
           user,
           action,
@@ -492,6 +497,7 @@ protected[actions] trait PrimitiveActions {
       case None => // sequence
         session.accounting.components += 1
         val SequenceExecMetaData(components) = action.exec
+        logging.info(this, s"invoking component Sequence Action $action activationid '${session.activationId}'")
         invokeSequence(
           user,
           action,

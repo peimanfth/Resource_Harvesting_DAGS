@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-memory=1
+memory=34
 timeout=240000
 
 cd ParallelAES
@@ -14,8 +14,9 @@ deploy AS DAG.json -w -i -m $memory -t $timeout
 cd ../../front-end/inputs
 
 dir=$(pwd)
-file="AS.json"
+file="AS1.json"
 sudo ../setRedis.sh $dir $file
+wsk -i action invoke AS -P $file
 
 # echo -e "\033[0;31mStarting Invocation\033[0m"
 

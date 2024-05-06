@@ -65,7 +65,7 @@ protected[entity] class MemoryLimit private (val megabytes: Int) extends AnyVal 
 
 protected[core] object MemoryLimit extends ArgNormalizer[MemoryLimit] {
 
-
+  val USER_CPU: Int = 8
   val MIN_CPU: Int = 1
   val MAX_CPU: Int = 8
   val STD_CPU: Int = 1

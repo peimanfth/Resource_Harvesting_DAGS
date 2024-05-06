@@ -275,7 +275,7 @@ cp -R src/* build
 cd build
 zip -r index.zip *
 
-wsk -i action update AES1 --kind python:3.10 --main main --memory $mem3 --timeout $timeout index.zip -p index 1
+wsk -i action update AES1 --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip -p index 1
 
 cd ../../
 
@@ -287,7 +287,7 @@ cp -R src/* build
 cd build
 zip -r index.zip *
 
-wsk -i action update AES2 --kind python:3.10 --main main --memory $mem2 --timeout $timeout index.zip -p index 2
+wsk -i action update AES2 --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip -p index 2
 
 cd ../../
 
@@ -300,7 +300,7 @@ cd build
 zip -r index.zip *
 
 
-wsk -i action update AES3 --kind python:3.10 --main main --memory $mem1 --timeout $timeout index.zip -p index 3
+wsk -i action update AES3 --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip -p index 3
 
 cd ../../
 
