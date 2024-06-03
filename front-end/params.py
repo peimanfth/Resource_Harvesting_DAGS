@@ -38,7 +38,7 @@ USER_CONFIG = {
         },
         "Memory": 64,
         "CPU": 1,
-        "Params" : "./inputs/AS.json"
+        "Params" : "./inputs/AS1.json"
     },
     "vid": {
         "Functions": {

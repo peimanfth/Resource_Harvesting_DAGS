@@ -1,15 +1,18 @@
 
 # import time
-from params import USER_CONFIG, size_model, mem_model, cpu_model
+from params import USER_CONFIG, size_model, mem_model, cpu_model, WSK_CLI, WSK_ACTION
+from utils import run_shell_command
 import pandas as pd
 from ModelTrainer import ModelTrainer
 from FunctionEntity import FunctionEntity
+from logger import Logger
+import json
 
 class DAG:
     
-    def __init__(self, dag_id):
-        config = USER_CONFIG.get(dag_id, {})
-        self.dag_id = dag_id
+    def __init__(self, dag_type):
+        config = USER_CONFIG.get(dag_type, {})
+        self.dag_type = dag_type
         self.memory = config.get('Memory', 0)
         self.cpu = config.get('CPU', 0)
         self.input_file = config.get('Params', '')
@@ -26,13 +29,21 @@ class DAG:
 
     def add_function(self, function_name, user_memory, user_cpu, stage):
         function_entity = FunctionEntity(
-            dag_id=self.dag_id,
+            dag_type=self.dag_type,
             function_name=function_name,
             memory_allocated=user_memory,
             cpu_allocated=user_cpu,
             # Add other parameters as needed
         )
         self.functions.append(function_entity)
+
+    def invoke_DAG(self):
+        container_ID, error = run_shell_command(f"{WSK_CLI} {WSK_ACTION} invoke {self.dag_type} -P {self.input_file} | awk '{{print $6}}'")
+        # Omit tabs, newlines, and spaces
+        container_ID = container_ID.replace('\n', '').replace('\t', '').replace(' ', '')
+        print(container_ID)
+        if error:
+            print("Errors:", error)
 
 
 
@@ -71,8 +82,12 @@ class DAG:
     
     #setters
 
-    def set_input_file(self, input_file):
+    def set_input_file(self, input_file='inputs/AS1.json'):
         self.input_file = input_file
+        with open(input_file, 'r') as f:
+            data = json.load(f)
+        if self.dag_type == 'AS':
+            self.input_size = data.get('data', {}).get('num_of_iterations', None)
 
     def set_input_size(self, input_size):
         self.input_size = input_size
@@ -87,21 +102,26 @@ class DAG:
         return self.input_size
 
 if __name__ == "__main__":
+    logger = Logger().get_logger('testing')
     dag = DAG('AS')
-    dag.set_input_size(5000)
+    dag.set_input_file()
+    logger.debug(dag.dag_type)
+    logger.debug(dag.input_size)
     dag.PredictPipeline()
     for function in dag.functions:
-        print(function)
-        print(function.get_predicted_input_size())
-        print(function.get_predicted_max_cpu_usage())
-        print(function.get_predicted_max_memory_usage())
+        logger.info(function)
+        logger.info(function.get_predicted_input_size())
+        logger.info(function.get_predicted_max_cpu_usage())
+        logger.info(function.get_predicted_max_memory_usage())
+    dag.invoke_DAG()
+    
 
 
 # dag = DAG('AS')
 
 
 
-# print(f"DAG ID: {dag.dag_id}")
+# print(f"DAG ID: {dag.dag_type}")
 # print(f"Overall Memory: {dag.memory}")
 # print(f"Overall CPU: {dag.cpu}")
 # print(f"Configuration File: {dag.input_file}")

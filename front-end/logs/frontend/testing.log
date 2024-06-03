@@ -1,0 +1,84 @@
+2024-05-20 19:37:50,544 - root - DEBUG - Generating trace for AS with multiplier 0.1
+2024-05-20 19:37:50,544 - root - DEBUG - Generating trace for vid with multiplier 0.1
+2024-05-20 19:37:50,545 - root - DEBUG - Generating trace for AS with multiplier 1.0
+2024-05-20 19:37:50,545 - root - DEBUG - Generating trace for vid with multiplier 1.0
+2024-05-20 19:37:50,545 - root - DEBUG - Generating trace for AS with multiplier 10.0
+2024-05-20 19:37:50,546 - root - DEBUG - Generating trace for vid with multiplier 10.0
+2024-05-20 19:37:50,546 - root - INFO - {
+    "low": {
+        "AS": [
+            {
+                "dag_type": "AS",
+                "start_time": 1716251870.5449367,
+                "end_time": 1716251871.0449367,
+                "invocation_rate": 10.0
+            }
+        ],
+        "vid": [
+            {
+                "dag_type": "vid",
+                "start_time": 1716251870.5453115,
+                "end_time": 1716251870.9453115,
+                "invocation_rate": 10.0
+            }
+        ]
+    },
+    "normal": {
+        "AS": [
+            {
+                "dag_type": "AS",
+                "start_time": 1716251870.5456417,
+                "end_time": 1716251875.5456417,
+                "invocation_rate": 1.0
+            }
+        ],
+        "vid": [
+            {
+                "dag_type": "vid",
+                "start_time": 1716251870.5459507,
+                "end_time": 1716251874.5459507,
+                "invocation_rate": 1.0
+            }
+        ]
+    },
+    "high": {
+        "AS": [
+            {
+                "dag_type": "AS",
+                "start_time": 1716251870.5462573,
+                "end_time": 1716251920.5462573,
+                "invocation_rate": 0.1
+            }
+        ],
+        "vid": [
+            {
+                "dag_type": "vid",
+                "start_time": 1716251870.5465574,
+                "end_time": 1716251910.5465574,
+                "invocation_rate": 0.1
+            }
+        ]
+    }
+}
+2024-05-20 19:37:50,548 - root - DEBUG - AS
+2024-05-20 19:37:50,548 - root - DEBUG - 5000
+2024-05-20 19:37:50,577 - root - INFO - <FunctionEntity wait1 CPU: 1 Mem: 128>
+2024-05-20 19:37:50,577 - root - INFO - 5001.0
+2024-05-20 19:37:50,578 - root - INFO - 0.017209251352813856
+2024-05-20 19:37:50,578 - root - INFO - 9.88954623999999
+2024-05-20 19:37:50,578 - root - INFO - <FunctionEntity AES1 CPU: 1 Mem: 128>
+2024-05-20 19:37:50,578 - root - INFO - 5002.0
+2024-05-20 19:37:50,578 - root - INFO - 0.6543279587973472
+2024-05-20 19:37:50,578 - root - INFO - 23.11311360000001
+2024-05-20 19:37:50,578 - root - INFO - <FunctionEntity AES2 CPU: 1 Mem: 128>
+2024-05-20 19:37:50,578 - root - INFO - 20012.0
+2024-05-20 19:37:50,578 - root - INFO - 1.3029284423076908
+2024-05-20 19:37:50,578 - root - INFO - 28.38085632000001
+2024-05-20 19:37:50,578 - root - INFO - <FunctionEntity AES3 CPU: 1 Mem: 128>
+2024-05-20 19:37:50,578 - root - INFO - 44505.0
+2024-05-20 19:37:50,578 - root - INFO - 1.9852264106933841
+2024-05-20 19:37:50,578 - root - INFO - 35.34188543999998
+2024-05-20 19:37:50,578 - root - INFO - <FunctionEntity Stats CPU: 1 Mem: 128>
+2024-05-20 19:37:50,578 - root - INFO - 5001.0
+2024-05-20 19:37:50,578 - root - INFO - 0.004609968954656427
+2024-05-20 19:37:50,578 - root - INFO - 11.184701439999992

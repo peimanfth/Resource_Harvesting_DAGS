@@ -51,6 +51,9 @@ class LeanBalancer(config: WhiskConfig,
   override def invokerHealth(): Future[IndexedSeq[InvokerHealth]] = Future.successful(IndexedSeq.empty[InvokerHealth])
   override def clusterSize: Int = 1
 
+  // For code compatibility
+  override val schedulingState: ShardingContainerPoolBalancerState = null
+
   val poolConfig: ContainerPoolConfig = loadConfigOrThrow[ContainerPoolConfig](ConfigKeys.containerPool)
 
   val invokerName = InvokerInstanceId(0, None, None, poolConfig.userMemory)

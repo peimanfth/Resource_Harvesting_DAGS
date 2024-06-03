@@ -75,6 +75,9 @@ trait LoadBalancer {
 
   /** Close the load balancer */
   def close: Unit = {}
+
+  // Expose scheduling state
+  val schedulingState: ShardingContainerPoolBalancerState
 }
 
 /**

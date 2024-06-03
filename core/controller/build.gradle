@@ -49,6 +49,9 @@ dependencies {
     implementation "com.lightbend.akka.management:akka-management-cluster-bootstrap_${gradle.scala.depVersion}:${gradle.akka_management.version}"
     implementation "com.lightbend.akka.discovery:akka-discovery-kubernetes-api_${gradle.scala.depVersion}:${gradle.akka_management.version}"
     implementation "com.lightbend.akka.discovery:akka-discovery-marathon-api_${gradle.scala.depVersion}:${gradle.akka_management.version}"
+
+    implementation 'redis.clients:jedis:3.3.0'
+    implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.8.1'
 }
 
 mainClassName = "org.apache.openwhisk.core.controller.Controller"

@@ -36,7 +36,7 @@ import org.apache.openwhisk.core.entitlement._
 import org.apache.openwhisk.core.entity.ActivationId.ActivationIdGenerator
 import org.apache.openwhisk.core.entity.ExecManifest.Runtimes
 import org.apache.openwhisk.core.entity._
-import org.apache.openwhisk.core.loadBalancer.LoadBalancerProvider
+import org.apache.openwhisk.core.loadBalancer.{LoadBalancerProvider, RedisClient}
 import org.apache.openwhisk.http.CorsSettings.RespondWithServerCorsHeaders
 import org.apache.openwhisk.http.ErrorResponse.terminate
 import org.apache.openwhisk.http.{BasicHttpService, BasicRasService}
@@ -118,7 +118,6 @@ class Controller(val instance: ControllerInstanceId,
   private implicit val loadBalancer =
     SpiLoader.get[LoadBalancerProvider].instance(whiskConfig, instance)
   logging.info(this, s"loadbalancer initialized: ${loadBalancer.getClass.getSimpleName}")(TransactionId.controller)
-
   private implicit val entitlementProvider =
     SpiLoader.get[EntitlementSpiProvider].instance(whiskConfig, loadBalancer, instance)
   private implicit val activationIdFactory = new ActivationIdGenerator {}
@@ -227,6 +226,68 @@ class Controller(val instance: ControllerInstanceId,
       } ~ internalInvokerHealth ~ activationStatus ~ disable
     }
   }
+  //
+  // Redis client
+  //
+  // val redisHost: String = "192.168.1.103"
+  // val redisPort: Int = 6379
+  // val redisPassword: Option[String] = None
+  // val redisDatabase: Int = 0
+
+  private val redis = new RedisClient()
+  redis.init
+
+  class RedisThread(
+    redis: RedisClient
+  ) extends Thread {
+    override def run(){  
+      import scala.concurrent.ExecutionContext.Implicits.global
+      while (true) {
+        Thread.sleep(redis.interval)
+
+        // Get scheduling state
+        val schedulingState = loadBalancer.schedulingState
+
+        if (schedulingState != null) {
+          val permits = schedulingState.invokerSlots
+          var cpuPermits: Int = 0
+          var memoryPermits: Int = 0
+          var invokerList: IndexedSeq[String] = IndexedSeq[String]()
+          var memoryPermitsList: IndexedSeq[Int] = IndexedSeq[Int]()
+          var cpuPermitsList: IndexedSeq[Int] = IndexedSeq[Int]()
+
+          //every 100 ms log that this thread is still running
+          logging.info(this, s"RedisThread is still running")(TransactionId.controller)
+          
+
+          for (i <- 0 until permits.length) {
+            memoryPermits = memoryPermits + permits(i).availableMemoryPermits
+            cpuPermits = cpuPermits + permits(i).availableCpuPermits
+            invokerList = invokerList :+ ("invoker" + i.toString)
+            memoryPermitsList = memoryPermitsList :+ permits(i).availableMemoryPermits
+            cpuPermitsList = cpuPermitsList :+ permits(i).availableCpuPermits
+          }
+
+          // Update available CPU and memory
+          redis.setAvailableCpu(cpuPermits)
+          redis.setAvailableMemory(memoryPermits)
+
+          // Update available CPU and memory for each Invoker
+          redis.setAvailableResourceForInvoker(invokerList, memoryPermitsList, cpuPermitsList)
+        }
+        
+        // Update total number of undone requests
+        loadBalancer.totalActiveActivations onComplete { 
+          case Success(result) => redis.setActivations(result)
+          case _ => // Ignore
+        }
+      }
+    }
+  }
+
+  // Start monitoring states
+  val redisThread = new RedisThread(redis)
+  redisThread.start()
 }
 
 /**

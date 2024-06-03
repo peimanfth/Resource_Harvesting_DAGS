@@ -63,6 +63,9 @@ class FPCPoolBalancer(config: WhiskConfig,
   logging: Logging)
     extends LoadBalancer {
 
+  // For code compatibility
+  override val schedulingState: ShardingContainerPoolBalancerState = null
+
   private implicit val executionContext: ExecutionContext = actorSystem.dispatcher
   // This value is given according to the total waiting time at QueueManager for a new queue to be created.
   private implicit val requestTimeout: Timeout = Timeout(8.seconds)

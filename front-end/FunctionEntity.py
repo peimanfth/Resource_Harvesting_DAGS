@@ -1,13 +1,13 @@
 class FunctionEntity:
 
-    def __init__(self, dag_id, input_content=None, input_size=None, function_name=None,
+    def __init__(self, dag_type, input_content=None, input_size=None, function_name=None,
                  function_input=None, duration=None, parallel_duration=None, 
                  memory_allocated=None, cpu_allocated=None, max_memory_usage=None,
                  max_cpu_usage=None, avg_cpu_usage=None, start_time=None, 
                  end_time=None, timeout_status=None, input_file=None, 
                  predicted_input_size=None, predicted_max_cpu_usage=None, 
                  predicted_max_memory_usage=None, stage=None):
-        self.dag_id = dag_id
+        self.dag_type = dag_type
         self.input_content = input_content
         self.input_size = input_size
         self.function_name = function_name
