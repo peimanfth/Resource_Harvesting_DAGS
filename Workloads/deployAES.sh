@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-memory=34
+memory=1
 timeout=240000
 
 cd ParallelAES
@@ -16,7 +16,7 @@ cd ../../front-end/inputs
 dir=$(pwd)
 file="AS1.json"
 sudo ../setRedis.sh $dir $file
-wsk -i action invoke AS -P $file
+# wsk -i action invoke AS -P $file
 
 # echo -e "\033[0;31mStarting Invocation\033[0m"
 

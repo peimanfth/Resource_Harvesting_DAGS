@@ -118,6 +118,9 @@ class ModelTrainer:
         for actual, predicted in zip(y_actual, y_predicted):
             actualError = abs(actual - predicted)/actual
             error_list.append(actualError)
+            if predicted <= 0:
+                errors += 1
+                continue
             n = math.floor(math.log2(predicted))
             if not (2**n <= actual <= 2**(n+1)):
                 errors += 1

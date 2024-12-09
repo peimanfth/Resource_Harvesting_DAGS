@@ -317,7 +317,7 @@ def feature_decoder(encoded_value):
 
 
 if __name__ == "__main__":
-    dag_ID = "vid"
+    dag_ID = "AS"
     current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     # update_Function("wait1", 1, 1)
     # update_Function("AES1", 2,8)
@@ -329,28 +329,68 @@ if __name__ == "__main__":
     # update_Function("recognition1", 20, 8)
     # update_Function("recognition2", 20, 8)
   
-    # inputs_dir = "./newinput"
+    inputs_dir = "/home/peiman/openwhisk/front-end/inputs/aes_inputs"
     
-    # # Iterate through each input file in the inputs directory
+    # Iterate through each input file in the inputs directory
+    interations = 0
+    for input_file in os.listdir(inputs_dir):
+        if input_file.endswith(".json"):
+            input_path = os.path.join(inputs_dir, input_file)
+            
+            # Update function configurations if necessary
+            update_Function("AES1", 8, 8)
+            update_Function("AES2", 8, 8)
+            update_Function("AES3", 8, 8)
+            
+            # Invoke the DAG with the input and capture its profiling data
+            result = invokeDAG(dag_ID, input_path, current_time)
+
+            print(f"Iteration {interations} completed.")
+
+            # You might want to log the result or ID from the invocation
+            print(f"Invocation for {input_file} completed. Result: {result}")
+            interations += 1
+    # dag_ID = "vid"
+    # inputs_dir = "/home/peiman/openwhisk/front-end/inputs/video_inputs"
+    # input_path = "/home/peiman/openwhisk/front-end/inputs/video_inputs/run5.json"
+    # update_Function("recognition1", 8, 8)
+    # update_Function("recognition2", 8, 8)
+
+    # result = invokeDAG(dag_ID, input_path, current_time)
+    # input_path = "/home/peiman/openwhisk/front-end/inputs/video_inputs/run11.json"
+    # update_Function("recognition1", 8, 8)
+    # update_Function("recognition2", 8, 8)
+    
+    
+    # # Invoke the DAG with the input and capture its profiling data
+    # result = invokeDAG(dag_ID, input_path, current_time)
+    # input_path = "/home/peiman/openwhisk/front-end/inputs/video_inputs/run23.json"
+    # update_Function("recognition1", 8, 8)
+    # update_Function("recognition2", 8, 8)
+    
+    # # Invoke the DAG with the input and capture its profiling data
+    # result = invokeDAG(dag_ID, input_path, current_time)
+    
+    # Iterate through each input file in the inputs directory
     # interations = 0
     # for input_file in os.listdir(inputs_dir):
     #     if input_file.endswith(".json"):
     #         input_path = os.path.join(inputs_dir, input_file)
             
     #         # Update function configurations if necessary
-    #         # Example: update_Function("AES1", 2, 1)
+    #         update_Function("recognition1", 8, 8)
+    #         update_Function("recognition2", 8, 8)
             
     #         # Invoke the DAG with the input and capture its profiling data
-    #         result = invokeDAG(dag_ID, input_path)
+    #         result = invokeDAG(dag_ID, input_path, current_time)
 
-    #         print(f"intraction {interations} completed.")
+    #         print(f"Iteration {interations} completed.")
 
     #         # You might want to log the result or ID from the invocation
     #         print(f"Invocation for {input_file} completed. Result: {result}")
     #         interations += 1
-
     
-    input = "./inputs/vid.json"
+    # input = "./inputs/vid.json"
     # update_Function("streaming", 1, 1)
     # update_Function("decoder", 5, 1)
     # update_Function("recognition1", 20, 3)
@@ -445,11 +485,11 @@ if __name__ == "__main__":
     # update_Function("recognition1", 20, 4)
     # update_Function("recognition2", 20, 4)
     # result = invokeDAG(dag_ID, input, current_time)
-    update_Function("streaming", 1, 1)
-    update_Function("decoder", 5, 1)
-    update_Function("recognition1", 20, 6)
-    update_Function("recognition2", 20, 6)
-    result = invokeDAG(dag_ID, input, current_time)
+    # update_Function("streaming", 1, 1)
+    # update_Function("decoder", 5, 1)
+    # update_Function("recognition1", 20, 6)
+    # update_Function("recognition2", 20, 6)
+    # result = invokeDAG(dag_ID, input, current_time)
 
 
 

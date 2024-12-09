@@ -1,0 +1,27 @@
+2024-06-24 21:55:23,151 - root - INFO - Connected to Redis server
+2024-06-24 21:55:23,152 - root - INFO - Set wait1 field cpu_usage to 1
+2024-06-24 21:55:23,152 - root - INFO - Set wait1 field memory_usage to 128
+2024-06-24 21:55:23,152 - root - INFO - Set AES1 field cpu_usage to 1
+2024-06-24 21:55:23,152 - root - INFO - Set AES1 field memory_usage to 128
+2024-06-24 21:55:23,152 - root - INFO - Set AES2 field cpu_usage to 2
+2024-06-24 21:55:23,152 - root - INFO - Set AES2 field memory_usage to 128
+2024-06-24 21:55:23,153 - root - INFO - Set AES3 field cpu_usage to 2
+2024-06-24 21:55:23,153 - root - INFO - Set AES3 field memory_usage to 128
+2024-06-24 21:55:23,153 - root - INFO - Set Stats field cpu_usage to 1
+2024-06-24 21:55:23,153 - root - INFO - Set Stats field memory_usage to 128
+2024-06-24 21:55:23,153 - root - INFO - Connection pool closed
+2024-06-24 21:55:23,153 - root - INFO - Function: wait1
+2024-06-24 21:55:23,153 - root - INFO -   Predicted Max CPU Usage: 1
+2024-06-24 21:55:23,153 - root - INFO -   Predicted Max Memory Usage: 128
+2024-06-24 21:55:23,154 - root - INFO - Function: AES1
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max CPU Usage: 1
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max Memory Usage: 128
+2024-06-24 21:55:23,154 - root - INFO - Function: AES2
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max CPU Usage: 2
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max Memory Usage: 128
+2024-06-24 21:55:23,154 - root - INFO - Function: AES3
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max CPU Usage: 2
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max Memory Usage: 128
+2024-06-24 21:55:23,154 - root - INFO - Function: Stats
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max CPU Usage: 1
+2024-06-24 21:55:23,154 - root - INFO -   Predicted Max Memory Usage: 128

@@ -365,8 +365,24 @@ class ContainerProxy(factory: (TransactionId,
     // cold start (no container to reuse or available stem cell container)
     case Event(job: Run, _) =>
 
-      val memory = MemoryLimit.decodeMemory(job.action.limits.memory.megabytes)
-      val cpu = MemoryLimit.decodeCpu(job.action.limits.memory.megabytes)
+      var memory = 1024
+      var cpu = 2
+      val funcName = job.action.name.asString
+      val redis = new RedisClient(logging = logging)
+      // logging.info(this, s"The action ${funcName} is being created with memory ${memory} and cpu ${cpu}")
+      val resourceUtil = redis.getResourceUtil(funcName)
+      resourceUtil match {
+        case Some((cpuUsage, memoryUsage)) =>
+          memory = memoryUsage.toInt
+          cpu = cpuUsage.toInt
+          logging.info(this, s"Retrieved from Redis for ${funcName}: CPU Usage = ${cpuUsage}, Memory Usage = ${memoryUsage}")
+          logging.info(this, s"The action ${funcName} is using harvested resources with memory ${memory} and cpu ${cpu}")
+        case None =>
+          memory = MemoryLimit.decodeMemory(job.action.limits.memory.megabytes)
+          cpu = MemoryLimit.decodeCpu(job.action.limits.memory.megabytes)
+          logging.info(this, s"No resource utilization data found in Redis for ${funcName}")
+          logging.info(this, s"The action ${funcName} is being created with memory ${memory} and cpu ${cpu}")
+      }
 
       implicit val transid = job.msg.transid
       activeCount += 1

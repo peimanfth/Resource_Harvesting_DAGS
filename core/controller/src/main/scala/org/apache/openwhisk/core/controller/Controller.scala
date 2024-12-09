@@ -256,8 +256,8 @@ class Controller(val instance: ControllerInstanceId,
           var memoryPermitsList: IndexedSeq[Int] = IndexedSeq[Int]()
           var cpuPermitsList: IndexedSeq[Int] = IndexedSeq[Int]()
 
-          //every 100 ms log that this thread is still running
-          logging.info(this, s"RedisThread is still running")(TransactionId.controller)
+          // //every 100 ms log that this thread is still running
+          // logging.info(this, s"RedisThread is still running")(TransactionId.controller)
           
 
           for (i <- 0 until permits.length) {

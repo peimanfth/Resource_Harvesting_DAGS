@@ -2,16 +2,19 @@ from logger import Logger
 import json
 import time
 from DAG import DAG
+from redisClient import RedisClient
 class Environment:
 
-    def __init__(self):
+    def __init__(self, logger=None, redis_client=RedisClient()):
         self.dags = {}
         self.trace_settings = {
             'low': 0.1,
             'normal': 1.0,
             'high': 10.0
         }
-        self.logger = Logger().get_logger('Environment')
+        # self.logger = Logger().get_logger('Environment')
+        self.logger = logger or Logger().get_logger('Environment')
+        self.redis_client = redis_client
 
     def add_dag(self, dag_type, functions_data=None):
         dag = DAG(dag_type)
@@ -42,11 +45,10 @@ class Environment:
             start_time = end_time
         return trace_data
 
-
 if __name__ == "__main__":
     logger = Logger().get_logger('testing')
     
-    env = Environment()
+    env = Environment(logger=logger)
     env.add_dag('AS')
     env.add_dag('vid')
     # env.add_dag('CS')

@@ -1,7 +1,7 @@
 import json
 import os
 
-def generate_aes_dag_input(message_length=50, start_base_iterations=2000, end_base_iterations=12000, increment_iterations=100):
+def generate_aes_dag_input(message_length=50, start_base_iterations=150, end_base_iterations=3150, increment_iterations=10):
     configs = []
 
     for base_iterations in range(start_base_iterations, end_base_iterations + 1, increment_iterations):
@@ -12,7 +12,7 @@ def generate_aes_dag_input(message_length=50, start_base_iterations=2000, end_ba
                     "ignore_certs": True
                 },
                 "redis": {
-                    "uri": "redis://174.64.28.38"
+                    "uri": "redis://174.64.3.182"
                 }
             },
             "data": {
@@ -35,7 +35,7 @@ def generate_video_dag_input(start_frames=2, end_frames=101, video_names=["tokyo
                         "ignore_certs": True
                     },
                     "redis": {
-                        "uri": "redis://174.64.28.38"
+                        "uri": "redis://174.64.3.182"
                     }
                 },
                 "video": video_name,
@@ -60,8 +60,8 @@ def save_configs_to_files(configs, base_dir):
 
 # Generate the AES and Video DAG configurations
 aes_dag_configs = generate_aes_dag_input()
-video_dag_configs = generate_video_dag_input()
+# video_dag_configs = generate_video_dag_input()
 
 # Save the configurations to files in specific directories
-save_configs_to_files(aes_dag_configs, "peiman/aes_inputs")
-save_configs_to_files(video_dag_configs, "peiman/video_inputs")
+save_configs_to_files(aes_dag_configs, "/home/peiman/openwhisk/front-end/inputs/aes_inputs")
+# save_configs_to_files(video_dag_configs, "/home/peiman/openwhisk/front-end/inputs/video_inputs")

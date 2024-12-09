@@ -9,7 +9,7 @@ import os
 import time
 from sklearn.preprocessing import StandardScaler
 from ModelTrainer import ModelTrainer  # Ensure this can handle Keras models if needed
-from params import MODELS_DIR
+from params import MODELS_DIR_VID as MODELS_DIR
 
 def ensure_1d_array(data):
         """
@@ -86,7 +86,7 @@ def train_and_evaluate_model_pytorch(model, model_name, X_train, y_train, X_test
     
     model.train()
     start_time = time.time()
-    for epoch in range(300):
+    for epoch in range(500):
         optimizer.zero_grad()
         outputs = model(X_train_tensor)
         loss = criterion(outputs, y_train_tensor.view(-1, 1))
@@ -124,7 +124,7 @@ def inputPrediction(df, models):
     targets = ['Function Input']
     
     results = {}
-    error_directory = "./logs/remote/errors"
+    error_directory = "./logs/vid/errors"
     os.makedirs(error_directory, exist_ok=True)
 
     time_results = []
@@ -158,8 +158,8 @@ def inputPrediction(df, models):
             })
             results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": err}
     time_df = pd.DataFrame(time_results)
-    os.makedirs('./logs/remote/times', exist_ok=True)
-    time_df.to_csv('./logs/remote/times/model_time_statistics_InputSize.csv', index=False)
+    os.makedirs('./logs/vid/times', exist_ok=True)
+    time_df.to_csv('./logs/vid/times/model_time_statistics_InputSize.csv', index=False)
 
 def utilPrediction(df, models):
   
@@ -175,7 +175,7 @@ def utilPrediction(df, models):
     
 
     results = {}
-    error_directory = "./logs/remote/errors"
+    error_directory = "./logs/vid/errors"
     os.makedirs(error_directory, exist_ok=True)
 
     time_results = []
@@ -217,13 +217,13 @@ def utilPrediction(df, models):
             })
             results[f"{model_name}_{target}"] = {"y_test": y_test, "y_pred": y_pred, "error_rate": err}
     time_df = pd.DataFrame(time_results)
-    os.makedirs('./logs/remote/times', exist_ok=True)
-    time_df.to_csv('./logs/remote/times/model_time_statistics_Utilization.csv', index=False)
+    os.makedirs('./logs/vid/times', exist_ok=True)
+    time_df.to_csv('./logs/vid/times/model_time_statistics_Utilization.csv', index=False)
    
 
 if __name__ == '__main__':
     # The profiling data. We should generate distinct profiling data for each DAG
-    df = pd.read_csv('./logs/remote/2024-04-11_20-31-11/aes100.csv')
+    df = pd.read_csv('/home/peiman/openwhisk/front-end/logs/2024-10-17_12-54-49/test.csv')
 
 
 
@@ -234,7 +234,8 @@ if __name__ == '__main__':
         "DecisionTree": DecisionTreeRegressor,
         "SVR": SVR,
         "XGBoost": XGBRegressor,
-        "BasicNN": SimpleNN(input_size=6)
+        #should be nodes+1
+        "BasicNN": SimpleNN(input_size=5)
     }
     inputPrediction(df, models)
 

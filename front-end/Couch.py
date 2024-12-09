@@ -2,9 +2,10 @@ import os
 import time
 import couchdb
 from utils import run_cmd
+from params import COUCHDB_URL, VA_DB_NAME, COUCHDB_PASSWORD, COUCHDB_USERNAME, MR_DB_NAME, ML_DB_NAME, ACTIVATIONS_DB_NAME
 
 class Couch:
-    def __init__(self, couchdb_url, username, password):
+    def __init__(self, couchdb_url=COUCHDB_URL, username=COUCHDB_USERNAME, password=COUCHDB_PASSWORD):
         self.couchdb_url = couchdb_url
         self.username = username
         self.password = password
@@ -67,6 +68,52 @@ class Couch:
                     return doc
 
         return None
+
+    def get_doc_with_id(self, db_name, doc_id):
+        """
+        Retrieves a document by its ID, automatically prepending 'guest/' to the provided doc_id.
+
+        Parameters:
+        - db_name: Name of the database to query.
+        - doc_id: ID of the document to retrieve.
+
+        Returns:
+        - The document if found, otherwise None.
+        """
+        # Prepend 'guest/' to the doc_id
+        doc_id = f"guest/{doc_id}"
+
+        if db_name in self.couch:
+            db = self.couch[db_name]
+        else:
+            print(f"Database {db_name} not found.")
+            return None
+
+        try:
+            doc = db[doc_id]
+            return doc
+        except couchdb.http.ResourceNotFound:
+            print(f"Document with ID {doc_id} not found.")
+            return None
+
+    
+    # def get_doc_with_id(self, db_name, doc_id):
+    #     if db_name in self.couch:
+    #         db = self.couch[db_name]
+    #     else:
+    #         print(f"Database {db_name} not found.")
+    #         return None
+
+    #     try:
+    #         doc = db[doc_id]
+    #         return doc
+    #     except couchdb.http.ResourceNotFound:
+    #         return None
+        
+    def get_activation_duration(self, activation):
+        doc = self.get_doc_with_id(ACTIVATIONS_DB_NAME, 'guest/{activation}')
+        #get duraiton from the doc
+        return doc.get('duration', 0)
 
     def wipe_couchdb(self):
         run_cmd("../ansible/wipe.sh")
@@ -143,40 +190,85 @@ class Couch:
                     print(f"Failed to delete document: {doc_id}, Error: {rev_or_exc}")
         else:
             print("No documents to delete.")
+    
+
+    def get_parallel_stage_duration(self, db_name, doc_id):
+        """
+        Retrieves the duration of the parallel stage in a DAG by fetching the third log in the 'logs' list
+        and using its doc_id to get the duration of that specific activation.
+
+        Parameters:
+        - db_name: Name of the database containing the document.
+        - doc_id: ID of the document to retrieve.
+        """
+        # Fetch the document
+        doc = self.get_doc_with_id(db_name, doc_id)
+        
+        if not doc:
+            print(f"Document with ID {doc_id} not found.")
+            return None
+
+        # Ensure 'logs' is in the document and has at least 3 entries
+        logs = doc.get('logs', [])
+        if len(logs) < 3:
+            print("Not enough logs found in the document.")
+            return None
+
+        # Get the third log entry
+        third_log_id = logs[2]
+
+        # Retrieve the activation document with the third log ID
+        activation_doc = self.get_doc_with_id(db_name, third_log_id)
+        
+        if not activation_doc:
+            print(f"Document with ID {third_log_id} not found.")
+            return None
+
+        # Get the duration of the activation
+        parallel_stage_duration = activation_doc.get('duration', 0)
+
+        print(f"Duration of parallel stage (from log {third_log_id}): {parallel_stage_duration} ms")
+
+        return parallel_stage_duration
 
 
 # Example usage
 if __name__ == "__main__":
-    from params import COUCHDB_URL, VA_DB_NAME, COUCHDB_PASSWORD, COUCHDB_USERNAME, MR_DB_NAME, ML_DB_NAME
+    from params import COUCHDB_URL, VA_DB_NAME, COUCHDB_PASSWORD, COUCHDB_USERNAME, MR_DB_NAME, ML_DB_NAME, ACTIVATIONS_DB_NAME
     
     couch = Couch(COUCHDB_URL, COUCHDB_USERNAME, COUCHDB_PASSWORD)
 
-    couch.reset_couchdb_database(ML_DB_NAME, recreate=True),
-    couch.reset_couchdb_database(MR_DB_NAME, recreate=True),
-    couch.reset_couchdb_database(VA_DB_NAME, recreate=True)
+    # print(couch.get_activation_duration('000915dca13342928915dca133c292a4'))
+    test = couch.get_doc_with_id(ACTIVATIONS_DB_NAME, '21157562449d42c2957562449d82c21c')
+    print(test.get('duration', 0))
+    parallel_stage_duration = couch.get_parallel_stage_duration(ACTIVATIONS_DB_NAME, '21157562449d42c2957562449d82c21c')
 
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/car.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'car.mp4')
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tokyo.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tokyo.mp4')
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount.mp4')
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount1.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount1.mp4')
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/snow.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'snow.mp4')
-    video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tree.mp4')
-    couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tree.mp4')
+    # couch.reset_couchdb_database(ML_DB_NAME, recreate=True),
+    # couch.reset_couchdb_database(MR_DB_NAME, recreate=True),
+    # couch.reset_couchdb_database(VA_DB_NAME, recreate=True)
 
-    # Upload a Wikipedia XML file
-    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/enwiki-latest-pages-articles17.xml')
-    couch.upload_file_to_couchdb(xml_path, MR_DB_NAME, 'wikipedia_data', 'application/xml', 'wikipedia_data.xml')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/car.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'car.mp4')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tokyo.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tokyo.mp4')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount.mp4')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/mount1.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'mount1.mp4')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/snow.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'snow.mp4')
+    # video_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tree.mp4')
+    # couch.upload_file_to_couchdb(video_path, VA_DB_NAME, 'videos', 'video/mp4', 'tree.mp4')
 
-    # Upload a digits text file
-    digits_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/Digits_Train.txt')
-    couch.upload_file_to_couchdb(digits_path, ML_DB_NAME, 'train_digits', 'text/plain', 'digits.txt')
+    # # Upload a Wikipedia XML file
+    # xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/enwiki-latest-pages-articles17.xml')
+    # couch.upload_file_to_couchdb(xml_path, MR_DB_NAME, 'wikipedia_data', 'application/xml', 'wikipedia_data.xml')
+
+    # # Upload a digits text file
+    # digits_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/Digits_Train.txt')
+    # couch.upload_file_to_couchdb(digits_path, ML_DB_NAME, 'train_digits', 'text/plain', 'digits.txt')
  
-    # Poll for results example
-    # result_doc = couch.poll_couchdb_for_results(VA_DB_NAME, 'videos')
-    # if result_doc:
-    #     print("Document found:", result_doc)
+    # # Poll for results example
+    # # result_doc = couch.poll_couchdb_for_results(VA_DB_NAME, 'videos')
+    # # if result_doc:
+    # #     print("Document found:", result_doc)

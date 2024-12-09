@@ -87,7 +87,13 @@ __controller_ssl_keyPrefix: "controller-"
 __controller_blackbox_fraction: 0.10
 # __loadbalancer: "org.apache.openwhisk.core.loadBalancer.GreedyBalancer"
 
-__loadbalancer: "org.apache.openwhisk.core.loadBalancer.ShardingContainerPoolBalancer"
+# __loadbalancer: "org.apache.openwhisk.core.loadBalancer.RRBalancer"
+
+# __loadbalancer: "org.apache.openwhisk.core.loadBalancer.JSQBalancer"
+
+__loadbalancer: "org.apache.openwhisk.core.loadBalancer.GreedyJSQBalancer"
+
+# __loadbalancer: "org.apache.openwhisk.core.loadBalancer.ShardingContainerPoolBalancer"
 
 # __loadbalancer: "org.apache.openwhisk.core.loadBalancer.GreedyRRBalancer"
 

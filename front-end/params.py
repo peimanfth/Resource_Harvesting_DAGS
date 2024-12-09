@@ -12,27 +12,27 @@ USER_CONFIG = {
         "Functions": {
             "wait1": {
                 "Memory": 128,
-                "CPU": 1,
+                "CPU": 2,
                 "stage" : "pre"
             },
             "AES1":{
                 "Memory": 128,
-                "CPU": 1,
+                "CPU": 2,
                 "stage" : "parallel"
             },
             "AES2":{
                 "Memory": 128,
-                "CPU": 1,
+                "CPU": 2,
                 "stage" : "parallel"
             },
             "AES3":{
                 "Memory": 128,
-                "CPU": 1,
+                "CPU": 2,
                 "stage" : "parallel"
             },
             "Stats": {
                 "Memory": 128,
-                "CPU": 1,
+                "CPU": 2,
                 "stage" : None
             }
         },
@@ -144,10 +144,13 @@ ML_DB_NAME = 'ml-pipeline'
 ACTIVATIONS_DB_NAME = 'whisk_local_activations'
 COUCHDB_PASSWORD = 'some_passw0rd'
 COUCHDB_USERNAME = 'whisk_admin'
-MODELS_DIR = 'models/remote'
-input_size_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Function Input.pkl')  # Example model for Input Size
-cpu_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Max CPU Usage.pkl')  # Example model for CPU
-mem_model_path = os.path.join(MODELS_DIR, 'model_RandomForest_Max Memory Usage.pkl')  # Example model for Memory
+# MODELS_DIR = 'models/remote'
+MODELS_DIR_VID = '/home/peiman/openwhisk/front-end/models/local/vid'
+MODELS_DIR_AES = '/home/peiman/openwhisk/front-end/models/local/aes'
+MODELS_DIR_AES1 = '/home/peiman/openwhisk/front-end/models/local/ml'
+input_size_model_path = os.path.join(MODELS_DIR_AES, 'model_RandomForest_Function Input.pkl')  # Example model for Input Size
+cpu_model_path = os.path.join(MODELS_DIR_AES, 'model_RandomForest_Max CPU Usage.pkl')  # Example model for CPU
+mem_model_path = os.path.join(MODELS_DIR_AES, 'model_RandomForest_Max Memory Usage.pkl')  # Example model for Memory
 
 
 cpu_model = joblib.load(cpu_model_path)

@@ -39,8 +39,8 @@ def handler(event, context=None):
         },
         "AES3": {
             "length_of_message": length_of_message,
-            "num_of_iterations": num_of_iterations * 3 * 3,
-            "num_of_processes": 3
+            "num_of_iterations": num_of_iterations * 4 * 4,
+            "num_of_processes": 4
         }
     }
 

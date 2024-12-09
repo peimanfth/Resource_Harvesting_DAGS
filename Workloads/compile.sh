@@ -1,7 +1,8 @@
 #!/bin/bash
 
 set -e
-memory=42
+memory=64
+memoryDefault=1
 timeout=240000
 
 echo -e "\033[0;31mStarting Compilation\033[0m"
@@ -263,7 +264,7 @@ cp -R src/* build
 cd build
 zip -r index.zip *
 
-wsk -i action update wait1 --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip
+wsk -i action update wait1 --kind python:3.10 --main main --memory $memoryDefault --timeout $timeout index.zip
 
 cd ../../
 
@@ -312,7 +313,7 @@ cp -R src/* build
 cd build
 zip -r index.zip *
 
-wsk -i action update Stats --kind python:3.10 --main main --memory $memory --timeout $timeout index.zip
+wsk -i action update Stats --kind python:3.10 --main main --memory $memoryDefault --timeout $timeout index.zip
 
 cd ../../
 

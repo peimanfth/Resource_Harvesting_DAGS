@@ -110,3 +110,6 @@ frontend/inputss/*
 
 Workloads/tools/data/*
 front-end/data/*
+
+#ignore all json files in all directories
+**/*.json

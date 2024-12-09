@@ -98,6 +98,27 @@ class RedisClient (
         }
     }
 
+    def getResourceUtil(functionName: String): Option[(String, String)] = {
+    val jedis = pool.getResource
+    try {
+        val key = s"$functionName"
+        val cpuUsage = jedis.hget(key, "cpu_usage")
+        val memoryUsage = jedis.hget(key, "memory_usage")
+        
+        if (cpuUsage != null && memoryUsage != null) {
+            Some((cpuUsage, memoryUsage))
+        } else {
+            None
+        }
+    } catch {
+        case e: Exception => 
+            logging.error(this, s"getResourceUtil failed: $e")
+            None
+    } finally {
+        jedis.close() // Ensure jedis is closed after operation
+    }
+}
+
 
     
 

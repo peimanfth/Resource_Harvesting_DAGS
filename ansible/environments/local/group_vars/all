@@ -49,7 +49,8 @@ container_pool_akka_client: true
 runtimes_enable_concurrency: true
 limit_action_concurrency_max: 500
 namespace_default_limit_action_concurrency_max: 500
-
+limit_invocations_per_minute: 1000
+limit_invocations_concurrent: 1000
 invoker_heap: "5g"
 # invoker_user_memory: '240g'
 

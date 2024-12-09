@@ -16,10 +16,10 @@ class Logger():
             os.makedirs(log_path, exist_ok=False)
         except OSError:
             pass
-            
+
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
-    
+
         self.console_handler = logging.StreamHandler()
         self.console_handler.setLevel(logging.INFO)
         self.logger.addHandler(self.console_handler)
@@ -27,6 +27,7 @@ class Logger():
         self.file_handler = None
 
     def get_logger(self, file_name, overwrite=True):
+        # Remove existing handlers
         if self.file_handler is not None:
             self.logger.removeHandler(self.file_handler)
 
@@ -38,11 +39,12 @@ class Logger():
         self.file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self.file_handler.setFormatter(formatter)
-        self.logger.addHandler(self.file_handler)
+
+        # Check if the handler is already added to avoid duplication
+        if self.file_handler not in self.logger.handlers:
+            self.logger.addHandler(self.file_handler)
 
         return self.logger
-    
+
     def shutdown_logger(self):
         logging.shutdown()
-        
-        

@@ -127,7 +127,8 @@ def handler(event, context=None):
     # while not result_queue.empty():
     #     results.append(result_queue.get())
 
-    NUM_PROCESSES = (event['index'] + 1) * 3
+    # NUM_PROCESSES = (event['index'] + 1) * 3
+    NUM_PROCESSES = (event['index'] + 1) * 1
 
     with Manager() as manager:
         result_queue = manager.Queue()

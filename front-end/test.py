@@ -1,7 +1,7 @@
 from utils import decode_action, encode_action, decodeCpu, decodeMemory, run_cmd, run_shell_command
 from params import *
 from Couch import Couch
-from invoker_v2 import update_Function
+from pilotRun import update_Function
 
 
 # for i in range(1, 8*32):
@@ -108,5 +108,31 @@ from invoker_v2 import update_Function
 # print(encode_action(2, 40))
 # update_Function("streaming", 2,1)
 # update_Function("decoder", 2,5)
-update_Function("recognition1", 20,3)
-update_Function("recognition2", 6,3)
+# update_Function("recognition1", 20,3)
+# update_Function("recognition2", 6,3)
+# print(encode_action(3, 1))
+
+# run_shell_command("wsk -i action invoke hi")
+
+# run_shell_command("wsk -i action invoke bye")
+# run_shell_command("wsk -i action invoke hi")
+# run_shell_command("wsk -i action invoke bye")
+# run_shell_command("wsk -i action invoke bye")
+# run_shell_command("wsk -i action invoke hi")
+# run_shell_command("wsk -i action invoke bye")
+
+# run_shell_command("wsk -i action invoke hi")
+
+
+# run_shell_command("wsk -i action invoke hi")
+
+
+# run_shell_command("wsk -i action invoke hi")
+
+
+# run_shell_command("wsk -i action invoke hi")
+update_Function("wait1", 8, 1)
+update_Function("AES1", 8, 2)
+update_Function("AES2", 8, 2)
+update_Function("AES3", 8, 2)
+update_Function("Stats", 8, 1)
