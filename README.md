@@ -31,7 +31,7 @@
 [![Performance Tests](https://github.com/apache/openwhisk/actions/workflows/6-performance.yaml/badge.svg)](https://github.com/apache/openwhisk/actions/workflows/6-performance.yaml)
 [![codecov](https://codecov.io/gh/apache/openwhisk/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/openwhisk)
 
-This project was built on top of OpenWhisk and supports an ML Prediction Pipeline together with an efficent harvesting mechanism to siginificantly reduce the E2E latency for DAG-based jobs. You can find more info [here].(https://repository.lsu.edu/gradschool_theses/6045/)
+This project was built on top of OpenWhisk and supports an ML Prediction Pipeline together with an efficent harvesting mechanism to siginificantly reduce the E2E latency for DAG-based jobs. You can find more info [here](https://repository.lsu.edu/gradschool_theses/6045/).
 
 OpenWhisk is a serverless functions platform for building cloud applications.
 OpenWhisk offers a rich programming model for creating serverless APIs from functions,
